@@ -25,6 +25,7 @@ if(isset($_POST['submit'])) {
     $catid = intval($_POST['catid']);
     $series = $_POST['series'];
     $scripture = $_POST['scripture'];
+    $scriptures = $_POST['docx_scriptures'];
     $image_verse = $_POST['image_verse'];
 
     $timestamp = date('Y-m-d H-i-s').' - '.time();
@@ -223,33 +224,36 @@ if(isset($_POST['submit'])) {
             $('input#message-notes').change(function(e) {
                 var file = e.currentTarget.files[0];
                 var objectUrl = URL.createObjectURL(file);
-                console.log(objectUrl);
                 loadFile(objectUrl, function(err,content){
                     var zip = new JSZip(content);
                     var doc=new window.docxtemplater().loadZip(zip);
                     text=doc.getFullText();
-                    console.log(text);
                     var re = /【([^】]+)】/g;
                     var m;
-                    var done = {};
+                    var verses = [];
                     do {
                         m = re.exec(text);
                         if (m) {
                             var verse = m[1].trim();
-                            console.log(done);
                             verse = verse.replace(/  +/g, " ");
-                            if (! done[verse]) {
-                                $('#scripture').val($('#scripture').val() + ($('#scripture').val().length ? '; ' : '') + verse);
-                                if (!$('#image-verse').val().length) {
-                                    var singleVerse = verse.replace(/[^\w :-]+/g, " ");
-                                    singleVerse = singleVerse.split(/[,;-]/)[0];
-                                    singleVerse = singleVerse.trim();
-                                    $('#image-verse').val(singleVerse);
-                                }
-                                done[verse] = true;
+                            if (! verses.includes(verse)) {
+                                verses.push(verse);
                             }
                         }
                     } while (m);
+                    if (verses.length > 0) {
+                        var mainVerse = verses[0];
+                        if (!$('#scripture').val().length)
+                            $('#scripture').val(mainVerse);
+                        if (!$('#image-verse').val().length) {
+                            var singleVerse = mainVerse.replace(/[^\w :-]+/g, " ");
+                            singleVerse = singleVerse.split(/[,;-]/)[0];
+                            singleVerse = singleVerse.trim();
+                            $('#image-verse').val(singleVerse);
+                        }
+                        $("#scripture-note").html("All verses in DOCX: <ul><li>" + verses.join("</li><li>") + "</li></uL>");
+                        $("#docx-scriptures").val(verses.join("\n"));
+                    }
                 });
             });
         });
@@ -257,31 +261,35 @@ if(isset($_POST['submit'])) {
 </head>
 <body>
 
-<?php if ($message_mp3): ?>
-<pre>
-<?php
-    makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $title_english, $title_chinese, $date, $catid, $series, $speaker, $scripture, $image_verse);
-?>
-</pre>
-
-<?php
+<?php if ($_POST['submit']): ?>
+    <?php
     if($message_mp3) {
         //show success message
-        echo "<h1>Uploaded:</h1>";
+        echo "<b>Uploaded:</b>";
         echo "<ul>";
-        echo "<li>".$message_mp3."</li>";
-        echo "<li>".$message_ppt."</li>";
-        echo "<li>".$message_docx."</li>";
+        echo "<li>MP3: ".($message_mp3?$message_mp3:"none")."</li>";
+        echo "<li>PPTX: ".($message_ppt?$message_ppt:"none")."</li>";
+        echo "<li>DOCX: ".($message_docx?$message_docx:"none")."</li>";
         echo "</ul>";
     }
+    ?>
+
+    <pre>
+<?php
+    makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $title_english, $title_chinese, $date, $catid, $series, $speaker, $scripture, $scriptures, $image_verse);
 ?>
+    </pre>
 <?php endif;?>
 
+<h1>Sermon Upload/Update</h1>
+<p>This form allows you to both upload new sermons or update existing ones. This is all by date, so a single date can only have one sermon, and that is the unique
+identifier to know if you are adding a new one or updating an existing one. If you are updating an existing one, and the MP3, PPTTX or DOCX already on the website are good, you do not need to add them again, as it will copy the old ones.
+However, for the scripture image, if you want to keep the old one, you need to make sure the Image Verse field is empty.</p>
 <form action="" enctype="multipart/form-data" method="post">
 
     <div>
-        <label for="message-mp3" class="required">Message MP3</label>
-        <input id="message-mp3" name="message_mp3" type="file" accept=".mp3" required/>
+        <label for="message-mp3">Message MP3</label>
+        <input id="message-mp3" name="message_mp3" type="file" accept=".mp3"/>
         <div>Duration: <span id="duration">--:--:--</span></div>
     </div>
 
@@ -354,10 +362,12 @@ if(isset($_POST['submit'])) {
     <p/>
 
     <div>
-        <label for="scripture">Scripture</label>
+        <label for="scripture">Main Sermon Scripture</label>
         <textarea id="scripture" name="scripture" rows="5" cols="100"><?php echo $scripture?></textarea>
         <br/>
-        Separate multiple passages with a semi-colon (;), please use full book name with chapter and verse(s)
+        Put each scripture reference on its own line. Please use full book name with chapter and verse(s)
+        <div id="scripture-note" style="padding-top:10px"></div>
+        <input id="docx-scriptures" name="docx_scriptures" value="" type="hidden"/>
     </div>
 
     <div style="border: black solid;">
@@ -365,7 +375,7 @@ if(isset($_POST['submit'])) {
         <input type="text" id="image-verse" name="image_verse" value="<?php echo $image_verse?>" size="20">
         <br/>
         If this is empty, will attempt to get the first verse of the passage in the "Scripture" field.
-        This is to be a verse that captures the message. Of course if Message Image file field (below) is used, then this is ignored.
+        This is to be a verse that captures the message. If Message Image file field (below) is used, then this is ignored.
         <p>OR</p>
         <label for="message-image">Message Image (can make your own from <a href="https://biblepic.com/genesis/1-1.htm" target="_blank">here</a> or find using <a href="https://www.google.com/search?q=Genesis+1:1&newwindow=1&safe=strict&source=lnms&tbm=isch&sa=X&ved=0ahUKEwjx2-a75bHgAhVXJzQIHcd6Bl8Q_AUIDigB&biw=1164&bih=601" target="_blank">Google</a>)</label>
         <input id="message-image" name="message_image" type="file" accept=".gif,.jpg,.jpeg,.png"/>

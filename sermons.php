@@ -17,8 +17,9 @@ $pptx_settings = '|width:650|height:450|border:1|border_style:solid|border_color
 $docx_settings = '|width:600|height:800|border:1|border_style:solid|border_color:#000000';
 $conn = null;
 $filename = null;
+$sermon_dir = null;
 
-function makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $title_english, $title_chinese, $date, $catid, $series, $speaker, $scripture, $image_verse)
+function makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $title_english, $title_chinese, $date, $catid, $series, $speaker, $scripture, $scriptures, $image_verse)
 {
     global $conn,
            $server_name,
@@ -30,9 +31,10 @@ function makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $
            $prefix,
            $pptx_settings,
            $docx_settings,
+           $sermon_dir,
            $getID3;
 
-    if (!$speaker || !$series || !$catid || !$date || !$title_english)
+    if (!$speaker || !$series || !$catid || !$date || !$title_english || !$title_chinese)
         die('Invalid data!');
 
     $filename = date('Y-m-d', strtotime($date)) . '_' . trim(preg_replace('/[^A-Za-z0-9_-]/', '-', $title_english)) . '_BCCC';
@@ -64,7 +66,7 @@ function makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $
     $old_message_image = null;
 
     if ($existing_row) {
-        echo "This date already has a sermon that exists, so updating it...\n";
+        echo "This date (".$date.") already has a sermon that exists, so updating it...\n";
 //        echo "HAVE ROW:\n";
 //        var_dump($existing_row);
         $time = time();
@@ -114,7 +116,7 @@ function makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $
         $message_docx = $filename . '.docx';
     }
 
-    if (!$message_image || !file_exists($message_image)) {
+    if ((!$message_image || !file_exists($message_image)) && $image_verse == null) {
         $message_image = ($old_message_image ? $old_message_image : null);
     }
     if ($message_image) {
@@ -128,8 +130,8 @@ function makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $
             $series = $info['tags']['id3v2']['album'][0];
         if (! $speaker)
             $speaker = $info['tags']['id3v2']['artist'][0];
-        if (! $scripture)
-            $scripture = $info['tags']['id3v2']['comment'][0];
+        if (! $scriptures)
+            $scriptures = $info['tags']['id3v2']['comment'][0];
         if (! $title_english)
             $title_english = $info['tags']['id3v2']['title'][0];
     }
@@ -141,7 +143,10 @@ function makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $
     $tagwriter->remove_other_tags = false; // if true removes other tag formats (e.g. ID3v1, ID3v2, APE, Lyrics3, etc) that may be present in the file and only write the specified tag format(s). If false leaves any unspecified tag formats as-is.
     $tagwriter->tag_encoding = $encoding;
 
-    $scripture = preg_replace('/  +/', ' ', $scripture); # Removes any double spaces
+    $scriptures = preg_replace('/  +/', ' ', $scriptures); # Removes any double spaces
+    if(! $scriptures || strpos($scriptures, $scripture) === false) {
+        $scriptures = $scripture.($scriptures?"\n".$scriptures:"");
+    }
 
     $tag_data = array(
         'title' => array($title_english . ' ' . $title_chinese . ' - ' . $date),
@@ -149,12 +154,12 @@ function makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $
         'album' => array($series),
         'year' => array(date('Y', strtotime($date))),
         'genre' => array('Sermons'),
-        'comment' => array($scripture),
+        'comment' => array($scriptures),
         'track' => array('01'),
         'popularimeter' => array('email' => 'info@boiseccc.org', 'rating' => 128, 'data' => 0),
         'unique_file_identifier' => array('ownerid' => 'info@boiseccc.org', 'data' => md5(time())),
     );
-    echo "Updating tags in MP3 file... (see <a href=\"$sermon_dir/$filename-tags.txt\" target=\"_blank\">tag file</a>)\n";
+    echo "Updating tags in MP3 file... (see <a href=\"../$sermon_dir/$filename-tags.txt\" target=\"_blank\">tag file</a>)\n";
 //    var_dump($tag_data);
     file_put_contents($filename . "-tags.txt", json_encode($tag_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     $tagwriter->tag_data = $tag_data;
@@ -168,17 +173,20 @@ function makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $
         die('Failed to write tags!<br>' . implode('<br><br>', $tagwriter->errors));
     }
 
+    if (! $scripture && $scriptures)
+        $scripture = explode("\n", $scriptures)[0];
+    $scripture = trim($scripture);
     $series_id = makeSeries($series, $catid);
     $speaker_id = makeSpeaker($speaker, $catid);
-    if (!$message_image) {
+    if (!$message_image || ! file_exists($message_image)) {
         if (!$image_verse)
-            $image_verse = trim(preg_split('/[\n,;]/', $scripture)[0]); # gets the first scripture verse (separated by ;) from the first line of the comment tag
+            $image_verse = $scripture;
         $image_verse = trim(preg_replace('/[^A-Za-z0-9 _:,-]/', '', $image_verse)); # removes chinese characters
         $image_verse = preg_replace('/  +/', ' ', $image_verse); # Removes any double spaces
         $message_image = $filename . '.jpg';
     }
 
-    $body_lines = array($scripture);
+    $body_lines = array('<p>經文 Scripture:<ul><li>'.preg_replace('/ *\n */', '</li><li>', $scriptures).'</li></ul></p>');
     $add_file = '';
     $add_file_desc = '';
     if (file_exists($message_ppt)) {
@@ -242,7 +250,7 @@ function makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $
         $sermon_id = insertIntoTable($prefix . 'sermon_sermons', $row);
         echo "Adding Sermon... ";
     }
-    echo "(see <a href=\"$sermon_dir/$filename-row.txt\" target=\"_blank\"'>row data</a>\n";
+    echo "(see <a href=\"../$sermon_dir/$filename-row.txt\" target=\"_blank\"'>row data</a>\n";
     deleteScriptures($sermon_id);
     makeScriptureRef($sermon_id, $scripture);
     $row['id'] = $sermon_id;
@@ -358,7 +366,7 @@ function deleteScriptures($id) {
 function makeScriptureRef($sermon_id, $scripture)
 {
 	global $prefix, $filename, $sermon_dir;
-	$scriptures = explode(';', $scripture);
+	$scriptures = explode("\n", $scripture);
 	$refs = array();
 	$bad_refs = array();
 	$order = array();
@@ -387,10 +395,10 @@ function makeScriptureRef($sermon_id, $scripture)
     foreach($order as $script) {
         insertIntoTable($prefix . 'sermon_scriptures', $refs[$script]);
     }
-    echo "Adding Scripture References... (see <a href=\"$sermon_dir/$filename-refs.txt\" target=\"_blank\">scripture refs</a>)\n";
+    echo "Adding Scripture References... (see <a href=\"../$sermon_dir/$filename-refs.txt\" target=\"_blank\">scripture refs</a>)\n";
     file_put_contents($filename . "-refs.txt", json_encode($refs, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
     if (count($bad_refs)) {
-        echo "Has bad Scripture References! (see <a href=\"$sermon_dir/$filename-bad_refs.txt\" target=\"_blank\">bad refs</a>)\n";
+        echo "Has bad Scripture References! (see <a href=\"../$sermon_dir/$filename-bad_refs.txt\" target=\"_blank\">bad refs</a>)\n";
         file_put_contents($filename . "-bad_refs.txt", json_encode($bad_refs, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
 }
