@@ -243,14 +243,11 @@ if(isset($_POST['submit'])) {
                     } while (m);
                     if (verses.length > 0) {
                         var mainVerse = verses[0];
-                        if (!$('#scripture').val().length)
-                            $('#scripture').val(mainVerse);
-                        if (!$('#image-verse').val().length) {
-                            var singleVerse = mainVerse.replace(/[^\w :-]+/g, " ");
-                            singleVerse = singleVerse.split(/[,;-]/)[0];
-                            singleVerse = singleVerse.trim();
-                            $('#image-verse').val(singleVerse);
-                        }
+                        $('#scripture').val(mainVerse);
+                        var singleVerse = mainVerse.replace(/[^\w :-]+/g, " ");
+                        singleVerse = singleVerse.split(/[,;-]/)[0];
+                        singleVerse = singleVerse.trim();
+                        $('#image-verse').val(singleVerse);
                         $("#scripture-note").html("All verses in DOCX: <ul><li>" + verses.join("</li><li>") + "</li></uL>");
                         $("#docx-scriptures").val(verses.join("\n"));
                     }
