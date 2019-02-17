@@ -282,9 +282,13 @@ if(isset($_POST['submit'])) {
 <?php endif;?>
 
 <h1>Sermon Upload/Update</h1>
-<p>This form allows you to both upload new sermons or update existing ones. This is all by date, so a single date can only have one sermon, and that is the unique
-identifier to know if you are adding a new one or updating an existing one. If you are updating an existing one, and the MP3, PPTTX or DOCX already on the website are good, you do not need to add them again, as it will copy the old ones.
-However, for the scripture image, if you want to keep the old one, you need to make sure the Image Verse field is empty.</p>
+<ul><li>This form allows you to both upload new sermons or update existing ones.</li>
+    <li>This is all by date, so a single date can only have one sermon, and that is the unique
+identifier to know if you are adding a new one or updating an existing one.</li>
+    <li>If you are updating an existing one, and the MP3, PPTTX or DOCX already on the website are good, you do not need to add them again, as it will copy the old ones.</li>
+    <li>For the scripture image, if you want to keep the old one, you need to make sure the Image Verse field is empty.</li>
+    <li>For a new sermon, if you don't have an MP3, please still create an sermon with whatever files are available. You do NOT have to add an MP3. A dummy MP3 will be created saying there is no audio for the sermon.</li>
+</ul>
 <form action="" enctype="multipart/form-data" method="post">
 
     <div>
