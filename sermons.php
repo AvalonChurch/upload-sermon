@@ -92,17 +92,13 @@ function cleanUpScripture($scripture) {
     $scripture = preg_replace('/  +/', ' ', $scripture);
     $scripture = trim($scripture);
     if(! preg_match('/[A-Z]/', $scripture)) {
-        echo "HERE: $scripture\n";
-        $scripture = preg_replace_callback_array('/(【*)([^0-9abc ,;-]+)(.*)/', function ($matches) {
+        $scripture = preg_replace_callback('/(【*)([^0-9abc ,;-]+)(.*)/', function ($matches) {
             global $chineseToEnglish;
-            echo "HERE2:\n";
-            print_r($matches);
             if($matches && $chineseToEnglish[$matches[2]])
-                return $matches[1].$matches[2].' '.$chineseToEnglish[$matches[2]].' '.trim(matches[3]);
+                return $matches[1].$matches[2].' '.$chineseToEnglish[$matches[2]].' '.$matches[3];
             else
                 return $matches[0];
         }, $scripture);
-        echo "SPECIAL: $scripture\n";
     }
     return $scripture;
 }
