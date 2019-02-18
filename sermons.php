@@ -139,7 +139,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
             }
         }
 
-        $filename = date('Y-m-d', strtotime($date)) . '_' . trim(preg_replace('/[^A-Za-z0-9_ -]/', '-', $title_english)) . '_BCCC';
+        $filename = date('Y-m-d', strtotime($date)) . '_' . trim(preg_replace('/[^A-Za-z0-9_-]/', '-', $title_english)) . '_BCCC';
 
         echo `pwd`."\n";
         echo "$file\n^^^\n";
@@ -254,7 +254,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
     }
 
     if (!$filename) {
-        $filename = date('Y-m-d', strtotime($date)) . '_' . trim(preg_replace('/[^A-Za-z0-9_ -]/', '-', $title_english)) . '_BCCC';
+        $filename = date('Y-m-d', strtotime($date)) . '_' . trim(preg_replace('/[^A-Za-z0-9_-]/', '-', $title_english)) . '_BCCC';
     }
 
     if (!$message_mp3 || !file_exists($message_mp3)) {
@@ -492,7 +492,7 @@ function makeSpeaker($title, $catid)
 	} else {
 		$row = array(
 			'title' => $title,
-			'alias' => strtolower(str_replace(' ', '-', trim(preg_replace('/[^A-Za-z0-9 _-]/', '', $title)))),
+			'alias' => strtolower(str_replace(' ', '-', trim(preg_replace('/[^A-Za-z0-9_-]/', '', $title)))),
 			'website' => 'http://www.boiseccc.org',
 			'pic' => 'images/speakers/blank-profile-picture.jpg',
 			'intro' => '',
@@ -712,5 +712,6 @@ function redo_all_sermons() {
         echo $date."\n\n";
         makeSermon($date);
         print("----------------------------------\n");
+        die();
     }
 }
