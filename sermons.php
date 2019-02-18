@@ -126,7 +126,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
-    $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE audiofile LIKE '%/" . $date . "_%.mp3'";
+    $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE sermon_date LIKE '$date %'";
     $result = $conn->query($sql);
     $existing_row = mysqli_fetch_assoc($result);
     $old_message_mp3 = null;
@@ -792,7 +792,7 @@ function redo_all_sermons() {
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
-    $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE audiofile LIKE '%2016-11-06%' ORDER BY sermon_date ASC";
+    $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE sermon_date LIKE '2017-05-%' ORDER BY sermon_date ASC";
     $result = $conn->query($sql);
     while($row = mysqli_fetch_assoc($result)){
         print_r($row);
