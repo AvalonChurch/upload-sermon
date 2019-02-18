@@ -66,6 +66,8 @@ function setSermonDir($catid) {
 }
 
 function getFileTitle($title) {
+    $title = explode(':', $title)[0];
+    $title = explode(' - ', $title)[0];
     $title = substr($title, 0, 40);
     $title = implode('-', array_slice(explode(' ', $title), 0, -1));
     $title = trim(preg_replace('/[^A-Za-z0-9_-]/', '-', $title));
