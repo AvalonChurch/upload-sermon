@@ -311,7 +311,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
         try {
             $docText = RD_Text_Extraction::convert_to_text($message_docx);
             preg_match_all('/【(.*?)】/', $docText, $matches, PREG_PATTERN_ORDER);
-            $scriptures = implode("\n", array_slice($matches[0], 1));
+            $scriptures = implode("\n", array_slice($matches[1], 1));
         } catch(Exception $e) {
             echo $e->getMessage();
         }
