@@ -53,7 +53,7 @@ function getChineseTitleFromDocx($docx_file) {
 
 function setSermonDir($catid) {
     global $sermon_dir;
-    if ($catid !== 21) {
+    if ($catid !== "21") {
         $sermon_dir = 'sermonspeaker/sermons';
     } else {
         $sermon_dir = 'sermonspeaker/friday';
