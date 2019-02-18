@@ -21,26 +21,30 @@ $filename = null;
 $sermon_dir = null;
 
 function getEnglishTitle($title) {
-    return preg_replace('/^201\d-\d+-\d+ /', '', trim(explode(' - ', preg_replace('/^([\x20-\x7f]+)[^\x20-\x7f].*/', '$1', $title))[0]));
+    $title = preg_replace('/^201\d-\d+-\d+ */', '', $title);
+    $title = preg_replace('/^([\x00-\x7F]+)[^\x00-\x7F].*/', '$1', $title);
+    $title = trim(explode(' - ', $title)[0];
+    return $title;
 }
 
 function getChineseTitle($title) {
-    return trim(explode(' - ', preg_replace('/^[\x20-\x7f]*([^\x20-\x7f].*)/', '$1', $title))[0]);
+    $title = preg_replace('/^201\d-\d+-\d+ */', '', $title);
+    $title = preg_replace('/^[\x00-\x7F]*([^\x00-\x7f].*)/', '$1', $title);
+    $title = trim(explode(' - ', $title)[0]);
+    return $title;
 }
 
 function getChineseTitleFromDocx($docx_file) {
     try {
         $docText = RD_Text_Extraction::convert_to_text($docx_file);
         $lines = explode("\n", $docText);
-        if (getChineseTitle($lines[0])) {
+        if (getChineseTitle($lines[0]))
             return getChineseTitle($lines[0]);
-        } else if (getChineseTitle($lines[1])) {
+        else
             return getChineseTitle($lines[1]);
-        }
     } catch (Exception $e) {
-        echo $e->getMessage();
+        die($e->getMessage());
     }
-    return "";
 }
 
 function setSermonDir($catid) {
