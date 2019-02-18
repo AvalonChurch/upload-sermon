@@ -93,7 +93,7 @@ function cleanUpScripture($scripture) {
     $scripture = trim($scripture);
     if(! preg_match('/[A-Z]/', $scripture)) {
         echo "HERE: $scripture\n";
-        $scripture = preg_replace_callback('/(【*)([^0-9abc ,;-]+)(.*)/', function ($matches) {
+        $scripture = preg_replace_callback_array('/(【*)([^0-9abc ,;-]+)(.*)/', function ($matches) {
             global $chineseToEnglish;
             echo "HERE2:\n";
             print_r($matches);
