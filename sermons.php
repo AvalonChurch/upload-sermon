@@ -371,6 +371,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
     if (! $main_scripture && $scriptures)
         $main_scripture = explode("\n", $scriptures)[0];
     $main_scripture = trim(preg_replace('/【(.*?)】/', '$1', $main_scripture));
+    $main_scripture = preg_replace('/：/', ':', $main_scripture);
     $series_id = makeSeries($series, $catid);
     $speaker_id = makeSpeaker($speaker, $catid);
     if (!$message_image || ! file_exists($message_image)) {
