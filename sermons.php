@@ -75,7 +75,7 @@ function getFileTitle($title) {
     return $title;
 }
 
-function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $message_docx = null, $message_image = null, $title_english = null, $title_chinese = null, $catid = null, $series = null, $speaker = null, $scripture = null, $scriptures = null, $image_verse = null)
+function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $message_docx = null, $message_image = null, $title_english = null, $title_chinese = null, $catid = null, $series = null, $speaker = null, $main_scripture = null, $image_verse = null)
 {
     global $conn,
            $server_name,
@@ -115,6 +115,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
     $old_message_ppt = null;
     $old_message_docx = null;
     $old_message_image = null;
+    $scriptures = "";
 
     if ($existing_row) {
         echo "This date (".$date.") already has a sermon that exists, so updating it...\n";
@@ -131,8 +132,6 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
                 $series = $info['tags']['id3v2']['album'][0];
             if (!$speaker)
                 $speaker = $info['tags']['id3v2']['artist'][0];
-//            if (! $scriptures)
-//              $scriptures = $info['tags']['id3v2']['comment'][0];
             $tag_title = $info['tags']['id3v2']['title'][0];
             if (!$title_english)
                 $title_english = getEnglishTitle($tag_title);
@@ -307,10 +306,10 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
     $tagwriter->remove_other_tags = false; // if true removes other tag formats (e.g. ID3v1, ID3v2, APE, Lyrics3, etc) that may be present in the file and only write the specified tag format(s). If false leaves any unspecified tag formats as-is.
     $tagwriter->tag_encoding = $encoding;
 
-    if(!$scriptures && $message_docx) {
+    if($message_docx && file_exists($message_docx)) {
         try {
             $docText = RD_Text_Extraction::convert_to_text($message_docx);
-            preg_match_all('/【.*?)】/', $docText, $matches, PREG_PATTERN_ORDER);
+            preg_match_all('/【(.*?)】/', $docText, $matches, PREG_PATTERN_ORDER);
             $scriptures = implode("\n", array_slice($matches[0], 1));
         } catch(Exception $e) {
             echo $e->getMessage();
@@ -318,8 +317,8 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
     }
 
     $scriptures = preg_replace('/  +/', ' ', $scriptures); # Removes any double spaces
-    if($scripture && (strpos($scriptures, $scripture) === false)) {
-        $s = $scripture;
+    if($main_scripture && (strpos($scriptures, $main_scripture) === false)) {
+        $s = $main_scripture;
         if (strpos($s, "【") === false)
             $s = "【" . $s . "】";
         $scriptures = $s . ($scriptures?"\n".$scriptures:"");
@@ -363,14 +362,14 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
         die('Failed to write tags!<br>' . implode('<br><br>', $tagwriter->errors));
     }
 
-    if (! $scripture && $scriptures)
-        $scripture = explode("\n", $scriptures)[0];
-    $scripture = trim(preg_replace('/【(.*?)】/', '$1', $scripture));
+    if (! $main_scripture && $scriptures)
+        $main_scripture = explode("\n", $scriptures)[0];
+    $main_scripture = trim(preg_replace('/【(.*?)】/', '$1', $main_scripture));
     $series_id = makeSeries($series, $catid);
     $speaker_id = makeSpeaker($speaker, $catid);
     if (!$message_image || ! file_exists($message_image)) {
         if (!$image_verse)
-            $image_verse = $scripture;
+            $image_verse = $main_scripture;
         $image_verse = trim(preg_replace('/[^A-Za-z0-9 _:,-]/', '', $image_verse)); # removes chinese characters
         $image_verse = preg_replace('/  +/', ' ', $image_verse); # Removes any double spaces
         $message_image = $filename . '.jpg';
@@ -453,7 +452,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
     }
     echo "(see <a href=\"../$sermon_dir/bak/$filename-row.txt\" target=\"_blank\"'>row data</a>)\n";
     deleteScriptures($sermon_id);
-    makeScriptureRef($sermon_id, $scripture);
+    makeScriptureRef($sermon_id, $main_scripture);
     $row['id'] = $sermon_id;
 //    var_dump($row);
     file_put_contents('bak/' . $filename . "-row.txt", json_encode($row, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));

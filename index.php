@@ -253,7 +253,6 @@ if(isset($_POST['submit'])) {
                         singleVerse = singleVerse.trim();
                         $('#image-verse').val(singleVerse);
                         $("#scripture-note").html("All verses in DOCX: <ul><li>" + verses.join("</li><li>") + "</li></uL>");
-                        $("#docx-scriptures").val(verses.join("\n"));
                     }
                 });
             });
@@ -372,7 +371,6 @@ identifier to know if you are adding a new one or updating an existing one.</li>
         <br/>
         Put each scripture reference on its own line. Please use full book name with chapter and verse(s)
         <div id="scripture-note" style="padding-top:10px"></div>
-        <input id="docx-scriptures" name="docx_scriptures" value="" type="hidden"/>
     </div>
 
     <div style="border: black solid;">
