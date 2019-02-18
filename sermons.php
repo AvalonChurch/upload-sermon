@@ -392,7 +392,8 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     $main_scripture = preg_replace('/【/', '', $main_scripture);
     $main_scripture = preg_replace('/】/', '', $main_scripture);
     $main_scripture = preg_replace('/：/', ':', $main_scripture);
-    $main_scripture = preg_replace('/, /', ',', $main_scripture);
+    $main_scripture = preg_replace('/，/', ',', $main_scripture);
+    $main_scripture = preg_replace('/,/', ', ', $main_scripture);
     $main_scripture = trim($main_scripture);
 
     $series_id = makeSeries($series, $catid);
@@ -667,7 +668,7 @@ function getScriptureRef($str)
 	}
 
 	# Matthew 5:6
-	preg_match('/^([^:-]+) (\d+):(\d[\dab]*)$/', $str, $matches);
+	preg_match('/^([^:-]+) (\d+):(\d[\dabc]*)$/', $str, $matches);
 	if ($matches) {
 		$ref['book'] = getBookNumber($matches[1]);
 		$ref['cap1'] = $matches[2];
@@ -676,7 +677,7 @@ function getScriptureRef($str)
 	}
 
 	# Matthew 5:1-6
-	preg_match('/^([^:-]+) (\d+):(\d[\dab]*)-(\d[\dab]*)$/', $str, $matches);
+	preg_match('/^([^:-]+) (\d+):(\d[\dabc]*)[-, ]+(\d[\dab]*)$/', $str, $matches);
 	if ($matches) {
 		$ref['book'] = getBookNumber($matches[1]);
 		$ref['cap1'] = $matches[2];
