@@ -668,7 +668,7 @@ function makeImage($basename, $scripture)
 }
 
 function redo_all_sermons() {
-    global $conn, $server_name, $username, $password, $db_name, $prefix;
+    global $conn, $server_name, $username, $password, $db_name, $prefix, $sermon_dir, $filename;
 
     $conn = new mysqli($server_name, $username, $password, $db_name);
     $conn->set_charset('utf8');
@@ -679,8 +679,11 @@ function redo_all_sermons() {
     $sql = "SELECT * FROM " . $prefix . "sermon_sermons ORDER BY sermon_date ASC";
     $result = $conn->query($sql);
     while($row = mysqli_fetch_assoc($result)){
+        print_r($row);
         $date = date('Y-m-d', strtotime($row['sermon_date']));
         echo $date."\n\n";
+        $sermon_dir = null;
+        $filename = null;
         makeSermon($date);
         print("----------------------------------\n");
     }
