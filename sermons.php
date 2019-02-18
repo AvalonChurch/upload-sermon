@@ -96,7 +96,6 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
            $sermon_dir,
            $getID3;
 
-    echo "STARTING DIR: ".`pwd`."\n";
     if (!$date) {
         $date_pattern = '/^(201\d-\d+-\d+).*/';
         if($message_mp3 && preg_match($date_pattern, $message_mp3))
@@ -157,8 +156,6 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
 
         $filename = date('Y-m-d', strtotime($date)) . '_' . getFileTitle($title_english) . '_BCCC';
 
-        echo `pwd`."\n";
-        echo "$file\n^^^\n";
         $time = time();
         if (file_exists($file . '.mp3')) {
             $old_message_mp3 = 'bak/' . $file . '_OLD-' . $time . '.mp3';
@@ -504,7 +501,6 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     $sermon_dir = null;
     $filename = null;
     $ret = chdir('../../upload-sermon');
-    echo "PWD: ".`pwd`."\nRET: ".print_r($ret, TRUE)."\n";
 }
 
 // Format to AA::BB:CC
@@ -762,7 +758,7 @@ function makeImage($basename, $scripture)
 }
 
 function redo_all_sermons() {
-    global $conn, $server_name, $username, $password, $db_name, $prefix, $sermon_dir, $filename;
+    global $conn, $server_name, $username, $password, $db_name, $prefix;
 
     $conn = new mysqli($server_name, $username, $password, $db_name);
     $conn->set_charset('utf8');
@@ -770,7 +766,7 @@ function redo_all_sermons() {
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
-    $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE audiofile LIKE '%2016-%' ORDER BY sermon_date ASC";
+    $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE audiofile LIKE '%2016-03-20%' ORDER BY sermon_date ASC";
     $result = $conn->query($sql);
     while($row = mysqli_fetch_assoc($result)){
         print_r($row);
