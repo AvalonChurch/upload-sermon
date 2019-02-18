@@ -345,10 +345,12 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     $docx_scriptures = preg_replace('/：/', ':', $docx_scriptures);
     $docx_scriptures = preg_replace('/，/', ',', $docx_scriptures);
     $docx_scriptures = preg_replace('/,/', ', ', $docx_scriptures);
+    $docx_scriptures = preg_replace('/: +/', ':', $docx_scriptures);
 
     $pptx_scriptures = preg_replace('/：/', ':', $pptx_scriptures);
     $pptx_scriptures = preg_replace('/，/', ',', $pptx_scriptures);
     $pptx_scriptures = preg_replace('/,/', ', ', $pptx_scriptures);
+    $pptx_scriptures = preg_replace('/: +/', ':', $pptx_scriptures);
 
     $comment = "";
     if($docx_scriptures)
@@ -399,6 +401,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     $main_scripture = preg_replace('/：/', ':', $main_scripture);
     $main_scripture = preg_replace('/，/', ',', $main_scripture);
     $main_scripture = preg_replace('/,/', ', ', $main_scripture);
+    $main_scripture = preg_replace('/: +/', ':', $main_scripture);
     $main_scripture = trim($main_scripture);
     echo "MAIN SCRIPTURE: $main_scripture\n";
     print_r($docx_scriptures);
