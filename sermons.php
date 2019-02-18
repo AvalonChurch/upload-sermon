@@ -81,6 +81,18 @@ function getFileTitle($title) {
     return $title;
 }
 
+function cleanUpScripture($scripture) {
+    $scripture = preg_replace('/：/', ':', $scripture);
+    $scripture = preg_replace('/，/', ',', $scripture);
+    $scripture = preg_replace('/,/', ', ', $scripture);
+    $scripture = preg_replace('/-/', '-', $scripture);
+    $scripture = preg_replace('/: +/', ':', $scripture);
+    $scripture = preg_replace('/；/', '; ', $scripture);
+    $scripture = preg_replace('/([^A-Za-z0-9: ,;_【】\n-])([A-Za-z0-9])/', '$1 $2', $scripture);
+    $scripture = trim($scripture);
+    return $scripture;
+}
+
 function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $message_docx = null, $message_image = null, $title_english = null, $title_chinese = null, $catid = null, $series = null, $speaker = null, $main_scripture = null, $image_verse = null)
 {
     global $conn,
@@ -342,15 +354,8 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
             $docx_scriptures = "【" . $docx_scriptures . "】";
     }
 
-    $docx_scriptures = preg_replace('/：/', ':', $docx_scriptures);
-    $docx_scriptures = preg_replace('/，/', ',', $docx_scriptures);
-    $docx_scriptures = preg_replace('/,/', ', ', $docx_scriptures);
-    $docx_scriptures = preg_replace('/: +/', ':', $docx_scriptures);
-
-    $pptx_scriptures = preg_replace('/：/', ':', $pptx_scriptures);
-    $pptx_scriptures = preg_replace('/，/', ',', $pptx_scriptures);
-    $pptx_scriptures = preg_replace('/,/', ', ', $pptx_scriptures);
-    $pptx_scriptures = preg_replace('/: +/', ':', $pptx_scriptures);
+    $docx_scriptures = cleanUpScripture($docx_scriptures);
+    $pptx_scriptures = cleanUpScripture($pptx_scriptures);
 
     $comment = "";
     if($docx_scriptures)
@@ -398,11 +403,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     }
     $main_scripture = preg_replace('/【/', '', $main_scripture);
     $main_scripture = preg_replace('/】/', '', $main_scripture);
-    $main_scripture = preg_replace('/：/', ':', $main_scripture);
-    $main_scripture = preg_replace('/，/', ',', $main_scripture);
-    $main_scripture = preg_replace('/,/', ', ', $main_scripture);
-    $main_scripture = preg_replace('/: +/', ':', $main_scripture);
-    $main_scripture = trim($main_scripture);
+    $main_scripture = cleanUpScripture($main_scripture);
     echo "MAIN SCRIPTURE: $main_scripture\n";
     print_r($docx_scriptures);
 
@@ -620,15 +621,24 @@ function makeScriptureRef($sermon_id, $scripture)
 	    $script = trim($script);
 	    if (strpos($script, ':') === false)
     	    $script = preg_replace('/(.+)(\d+) +(\d+)/', '\1\2:\3', $script);
-        $ref = getScriptureRef($script);
-        if ($ref && $ref['book']) {
-            $ref['sermon_id'] = $sermon_id;
-            if (! isset($refs[$script])) {
-                $refs[$script] = $ref;
-                $order[] = $script;
-            }
+        if (strpos($script, ';'))
+            $script = preg_replace('/(.+?) ([\dabc:,-]+); *(\d+)/', '$1 $2; $1 $3', $script);
+        if (strpos($script, ';')) {
+            $scripts = explode(';', $script);
         } else {
-            $bad_refs[] = $script;
+            $scripts = array($script);
+        }
+        foreach($scripts as $s) {
+            $ref = getScriptureRef($s);
+            if ($ref && $ref['book']) {
+                $ref['sermon_id'] = $sermon_id;
+                if (!isset($refs[$s])) {
+                    $refs[$s] = $ref;
+                    $order[] = $s;
+                }
+            } else {
+                $bad_refs[] = $s;
+            }
         }
     }
     print("ORDER:");
@@ -769,7 +779,7 @@ function redo_all_sermons() {
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
-    $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE audiofile LIKE '%201%' ORDER BY sermon_date ASC";
+    $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE audiofile LIKE '%2016-11-06%' ORDER BY sermon_date ASC";
     $result = $conn->query($sql);
     while($row = mysqli_fetch_assoc($result)){
         print_r($row);
