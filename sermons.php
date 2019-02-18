@@ -139,10 +139,10 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
             $old_message_mp3 = $file . '_OLD-' . $time . '.mp3';
             rename($file . '.mp3', $old_message_mp3);
             echo "rename($file . '.mp3', $old_message_mp3);";
-            echo "HERE $message_mp3 THERE\n";
-            die(`ls 2012-11-04*`);
+            echo(`ls 2012-11-0*`);
             if (!$message_mp3)
                 $message_mp3 = $old_message_mp3;
+            echo "message_mp3 = $message_mp3\n";
         }
 
         if (file_exists($file . '.pptx')) {
