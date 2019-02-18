@@ -334,7 +334,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     if($message_docx && file_exists($message_docx)) {
         try {
             $docxText = RD_Text_Extraction::convert_to_text($message_docx);
-            preg_match_all('/【([】]+\d+[】]*)】/', $docxText, $matches, PREG_PATTERN_ORDER);
+            preg_match_all('/【([^】]+\d+[^】]*)】/', $docxText, $matches, PREG_PATTERN_ORDER);
             $docx_scriptures = implode("\n", $matches[0]);
         } catch(Exception $e) {
             echo $e->getMessage();
@@ -344,7 +344,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     if($message_pptx && file_exists($message_pptx)) {
         try {
             $pptxText = RD_Text_Extraction::convert_to_text($message_pptx);
-            preg_match_all('/【([】]+\d+[】]*)】/', $pptxText, $matches, PREG_PATTERN_ORDER);
+            preg_match_all('/【([^】]+\d+[^】]*)】/', $pptxText, $matches, PREG_PATTERN_ORDER);
             $pptx_scriptures = implode("\n", $matches[0]);
             if(!$message_docx) {
                 $docx_scriptures = $pptx_scriptures;
