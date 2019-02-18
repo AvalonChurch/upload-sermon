@@ -40,8 +40,8 @@ function getChineseTitle($title) {
 
 function getChineseTitleFromDocx($docx_file) {
     try {
-        $docText = RD_Text_Extraction::convert_to_text($docx_file);
-        $lines = explode("\n", $docText);
+        $docxText = RD_Text_Extraction::convert_to_text($docx_file);
+        $lines = explode("\n", $docxText);
         if (getChineseTitle($lines[0]))
             return getChineseTitle($lines[0]);
         else
@@ -81,7 +81,7 @@ function getFileTitle($title) {
     return $title;
 }
 
-function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $message_docx = null, $message_image = null, $title_english = null, $title_chinese = null, $catid = null, $series = null, $speaker = null, $main_scripture = null, $image_verse = null)
+function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $message_docx = null, $message_image = null, $title_english = null, $title_chinese = null, $catid = null, $series = null, $speaker = null, $main_scripture = null, $image_verse = null)
 {
     global $conn,
            $server_name,
@@ -118,10 +118,11 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
     $result = $conn->query($sql);
     $existing_row = mysqli_fetch_assoc($result);
     $old_message_mp3 = null;
-    $old_message_ppt = null;
+    $old_message_pptx = null;
     $old_message_docx = null;
     $old_message_image = null;
-    $scriptures = "";
+    $docx_scriptures = "";
+    $pptx_scriptures = "";
 
     if ($existing_row) {
         echo "This date (".$date.") already has a sermon that exists, so updating it...\n";
@@ -169,10 +170,10 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
         }
 
         if (file_exists($file . '.pptx')) {
-            $old_message_ppt = 'bak/' . $file . '_OLD-' . $time . '.pptx';
-            rename($file . '.pptx', $old_message_ppt);
-            if (!$message_ppt)
-                $message_ppt = $old_message_ppt;
+            $old_message_pptx = 'bak/' . $file . '_OLD-' . $time . '.pptx';
+            rename($file . '.pptx', $old_message_pptx);
+            if (!$message_pptx)
+                $message_pptx = $old_message_pptx;
         }
         if (file_exists($file . '.docx')) {
             $old_message_docx = 'bak/' . $file . '_OLD-' . $time . '.docx';
@@ -196,13 +197,13 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
             $message_mp3 = $filename . '.mp3';
         }
 
-        if (!$message_ppt || !file_exists($message_ppt)) {
-            $message_ppt = ($old_message_ppt ? $old_message_ppt : null);
+        if (!$message_pptx || !file_exists($message_pptx)) {
+            $message_pptx = ($old_message_pptx ? $old_message_pptx : null);
         }
-        if ($message_ppt && file_exists($message_ppt)) {
-            echo "copy($message_ppt, $filename . '.pptx')\n";
-            copy($message_ppt, $filename . '.pptx');
-            $message_ppt = $filename . '.pptx';
+        if ($message_pptx && file_exists($message_pptx)) {
+            echo "copy($message_pptx, $filename . '.pptx')\n";
+            copy($message_pptx, $filename . '.pptx');
+            $message_pptx = $filename . '.pptx';
         }
 
         if (!$message_docx || !file_exists($message_docx) && $old_message_docx) {
@@ -278,12 +279,12 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
         $message_mp3 = $filename . '.mp3';
     }
 
-    if (!$message_ppt || !file_exists($message_ppt)) {
-        $message_ppt = ($old_message_ppt ? $old_message_ppt : null);
+    if (!$message_pptx || !file_exists($message_pptx)) {
+        $message_pptx = ($old_message_pptx ? $old_message_pptx : null);
     }
-    if ($message_ppt) {
-        copy($message_ppt, $filename . '.pptx');
-        $message_ppt = $filename . '.pptx';
+    if ($message_pptx) {
+        copy($message_pptx, $filename . '.pptx');
+        $message_pptx = $filename . '.pptx';
     }
 
     if (!$message_docx || !file_exists($message_docx)) {
@@ -314,25 +315,39 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
 
     if($message_docx && file_exists($message_docx)) {
         try {
-            $docText = RD_Text_Extraction::convert_to_text($message_docx);
-            preg_match_all('/【(.*?)】/', $docText, $matches, PREG_PATTERN_ORDER);
-            $scriptures = implode("\n", array_slice($matches[0], 1));
+            $docxText = RD_Text_Extraction::convert_to_text($message_docx);
+            preg_match_all('/【(.*?)】/', $docxText, $matches, PREG_PATTERN_ORDER);
+            $docx_scriptures = implode("\n", array_slice($matches[0], 1));
         } catch(Exception $e) {
             echo $e->getMessage();
         }
     }
 
-    $scriptures = preg_replace('/  +/', ' ', $scriptures); # Removes any double spaces
-    if($main_scripture && (strpos($scriptures, $main_scripture) === false)) {
+    if($message_pptx && file_exists($message_pptx)) {
+        try {
+            $pptxText = RD_Text_Extraction::convert_to_text($message_pptx);
+            preg_match_all('/【(.*?)】/', $pptxText, $matches, PREG_PATTERN_ORDER);
+            $pptx_scriptures = implode("\n", array_slice($matches[0], 1));
+            if(!$message_docx) {
+                $docx_scriptures = $pptx_scriptures;
+                $pptx_scriptures = "";
+            }
+        } catch(Exception $e) {
+            echo $e->getMessage();
+        }
+    }
+
+    $docx_scriptures = preg_replace('/  +/', ' ', $docx_scriptures); # Removes any double spaces
+    if($main_scripture && (strpos($docx_scriptures, $main_scripture) === false)) {
         $s = $main_scripture;
         if (strpos($s, "【") === false)
             $s = "【" . $s . "】";
-        $scriptures = $s . ($scriptures?"\n".$scriptures:"");
+        $docx_scriptures = $s . ($docx_scriptures?"\n".$docx_scriptures:"");
     }
 
     $comment = "";
-    if($scriptures)
-        $comment = "經文 Scripture:\n * ".preg_replace('/ *\n */', "\n * ", $scriptures)."\n\n";
+    if($docx_scriptures)
+        $comment = "經文 Scripture:\n * ".preg_replace('/ *\n */', "\n * ", $docx_scriptures)."\n\n";
     if($message_docx && file_exists($message_docx)) {
         try {
             $comment .= "筆記 Notes:\n\n";
@@ -368,8 +383,12 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
         die("Failed to write tags! Errors:\n" . implode("\n", $tagwriter->errors));
     }
 
-    if (! $main_scripture && $scriptures)
-        $main_scripture = explode("\n", $scriptures)[0];
+    if (! $main_scripture) {
+        if ($pptx_scriptures)
+            $main_scripture = explode("\n", $pptx_scriptures)[0];
+        else if ($docx_scriptures)
+            $main_scripture = explode("\n", $docx_scriptures)[0];
+    }
     $main_scripture = trim(preg_replace('/【(.*?)】/', '$1', $main_scripture));
     $main_scripture = preg_replace('/：/', ':', $main_scripture);
     $series_id = makeSeries($series, $catid);
@@ -383,13 +402,13 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
     }
 
     $body_lines = array();
-    if(trim($scriptures))
-        $body_lines[] = '<p>經文 Scripture:<ul><li>'.preg_replace('/ *\n */', '</li><li>', $scriptures).'</li></ul></p>';
+    if(trim($docx_scriptures))
+        $body_lines[] = '<p>經文 Scripture:<ul><li>'.preg_replace('/ *\n */', '</li><li>', $docx_scriptures).'</li></ul></p>';
     $add_file = '';
     $add_file_desc = '';
-    if (file_exists($message_ppt)) {
-        $body_lines[] = '{google_docs}/' . $sermon_dir . '/' . basename($message_ppt) . $pptx_settings . '{/google_docs}';
-        $add_file = '/' . $sermon_dir . '/' . basename($message_ppt);
+    if (file_exists($message_pptx)) {
+        $body_lines[] = '{google_docs}/' . $sermon_dir . '/' . basename($message_pptx) . $pptx_settings . '{/google_docs}';
+        $add_file = '/' . $sermon_dir . '/' . basename($message_pptx);
         $add_file_desc = 'PowerPoint Slides';
     }
     if (file_exists($message_docx)) {
@@ -736,7 +755,7 @@ function redo_all_sermons() {
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
-    $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE audiofile LIKE '%2016-%' ORDER BY sermon_date ASC";
+    $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE audiofile LIKE '%2016-02-28%' ORDER BY sermon_date ASC";
     $result = $conn->query($sql);
     while($row = mysqli_fetch_assoc($result)){
         print_r($row);
