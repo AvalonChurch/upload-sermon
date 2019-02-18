@@ -354,7 +354,9 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
         $message_image = $filename . '.jpg';
     }
 
-    $body_lines = array('<p>經文 Scripture:<ul><li>'.preg_replace('/ *\n */', '</li><li>', $scriptures).'</li></ul></p>');
+    $body_lines = array();
+    if($scriptures)
+        $body_lines[] = '<p>經文 Scripture:<ul><li>'.preg_replace('/ *\n */', '</li><li>', $scriptures).'</li></ul></p>';
     $add_file = '';
     $add_file_desc = '';
     if (file_exists($message_ppt)) {
