@@ -23,7 +23,7 @@ $sermon_dir = null;
 function getEnglishTitle($title) {
     $title = preg_replace('/^201\d-\d+-\d+ */', '', $title);
     $title = preg_replace('/^([\x00-\x7F]+)[^\x00-\x7F].*/', '$1', $title);
-    $title = trim(explode(' - ', $title)[0];
+    $title = trim(explode(' - ', $title)[0]);
     echo "ENGLISH: $title\n";
     return $title;
 }
