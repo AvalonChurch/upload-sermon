@@ -168,6 +168,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
             $message_mp3 = ($old_message_mp3 ? $old_message_mp3 : '../../no_recording.mp3');
 
         if ($message_mp3 && file_exists($message_mp3)) {
+            echo "copy($message_mp3, $filename . '.mp3')\n";
             copy($message_mp3, $filename . '.mp3');
             $message_mp3 = $filename . '.mp3';
         }
@@ -176,6 +177,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
             $message_ppt = ($old_message_ppt ? $old_message_ppt : null);
         }
         if ($message_ppt && file_exists($message_ppt)) {
+            echo "copy($message_ppt, $filename . '.pptx')\n";
             copy($message_ppt, $filename . '.pptx');
             $message_ppt = $filename . '.pptx';
         }
@@ -184,6 +186,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
             $message_docx = $old_message_docx;
         }
         if ($message_docx && file_exists($message_docx)) {
+            echo "copy($message_docx, $filename . '.docx')\n";
             copy($message_docx, $filename . '.docx');
             $message_docx = $filename . '.docx';
         }
@@ -192,6 +195,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
             $message_image = ($old_message_image ? $old_message_image : null);
         }
         if ($message_image && file_exists($message_image)) {
+            echo "copy($message_image, $filename . '.image')\n";
             copy($message_image, $filename . '.jpg');
             $message_image = $filename . '.jpg';
         }
@@ -200,15 +204,19 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
             $sql = "SELECT * FROM " . $prefix . "sermon_speakers WHERE id = " . $existing_row['speaker_id'];
             $result = $conn->query($sql);
             $speaker_row = mysqli_fetch_assoc($result);
-            if ($speaker_row)
+            if ($speaker_row) {
                 $speaker = $speaker_row['title'];
+                echo "FOUND SPEAKER: $speaker\n";
+            }
         }
         if(! $series) {
             $sql = "SELECT * FROM " . $prefix . "sermon_series WHERE id = " . $existing_row['series_id'];
             $result = $conn->query($sql);
             $series_row = mysqli_fetch_assoc($result);
-            if ($series_row)
+            if ($series_row) {
                 $series = $series_row['title'];
+                echo "FOUND SERIES: $series\n";
+            }
         }
         if(! $catid)
             $catid = $existing_row['catid'];
