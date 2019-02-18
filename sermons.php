@@ -12,7 +12,7 @@ $getID3->setOption(array('encoding'=>$encoding));
 $server_name = "127.0.0.1";
 $username = "boisecc1_website";
 $password = "website12834";
-$db_name = "boisecc1_joomla";
+$db_name = "boisecc1_joomla2";
 $prefix = 'vqyis_';
 $pptx_settings = '|width:650|height:450|border:1|border_style:solid|border_color:#000000';
 $docx_settings = '|width:600|height:800|border:1|border_style:solid|border_color:#000000';
@@ -133,7 +133,8 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
         $filename = date('Y-m-d', strtotime($date)) . '_' . trim(preg_replace('/[^A-Za-z0-9_ -]/', '-', $title_english)) . '_BCCC';
 
         echo `pwd`."\n";
-        echo "$file\n^^^\n";        $time = time();
+        echo "$file\n^^^\n";
+        $time = time();
         if (file_exists($file . '.mp3')) {
             $old_message_mp3 = $file . '_OLD-' . $time . '.mp3';
             rename($file . '.mp3', $old_message_mp3);
