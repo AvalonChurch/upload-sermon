@@ -310,8 +310,8 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
     if(!$scriptures && $message_docx) {
         try {
             $docText = RD_Text_Extraction::convert_to_text($message_docx);
-            preg_match_all('/【(.*?)】/', $docText, $matches, PREG_PATTERN_ORDER);
-            $scriptures = implode("\n", array_slice($matches[1], 1));
+            preg_match_all('/【.*?)】/', $docText, $matches, PREG_PATTERN_ORDER);
+            $scriptures = implode("\n", array_slice($matches[0], 1));
         } catch(Exception $e) {
             echo $e->getMessage();
         }
@@ -319,7 +319,10 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
 
     $scriptures = preg_replace('/  +/', ' ', $scriptures); # Removes any double spaces
     if($scripture && (strpos($scriptures, $scripture) === false)) {
-        $scriptures = $scripture.($scriptures?"\n".$scriptures:"");
+        $s = $scripture;
+        if (strpos($s, "【") === false)
+            $s = "【" . $s . "】";
+        $scriptures = $s . ($scriptures?"\n".$scriptures:"");
     }
 
     $comment = "";
@@ -362,7 +365,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
 
     if (! $scripture && $scriptures)
         $scripture = explode("\n", $scriptures)[0];
-    $scripture = trim($scripture);
+    $scripture = trim(preg_replace('/【(.*?)】/', '$1', $scripture));
     $series_id = makeSeries($series, $catid);
     $speaker_id = makeSpeaker($speaker, $catid);
     if (!$message_image || ! file_exists($message_image)) {
