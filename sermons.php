@@ -345,6 +345,14 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
             $docx_scriptures = "【" . $docx_scriptures . "】";
     }
 
+    $docx_scriptures = preg_replace('/：/', ':', $docx_scriptures);
+    $docx_scriptures = preg_replace('/，/', ',', $docx_scriptures);
+    $docx_scriptures = preg_replace('/,/', ', ', $docx_scriptures);
+
+    $pptx_scriptures = preg_replace('/：/', ':', $pptx_scriptures);
+    $pptx_scriptures = preg_replace('/，/', ',', $pptx_scriptures);
+    $pptx_scriptures = preg_replace('/,/', ', ', $pptx_scriptures);
+
     $comment = "";
     if($docx_scriptures)
         $comment = "經文 Scripture:\n * ".preg_replace('/ *\n */', "\n * ", $docx_scriptures)."\n\n";
@@ -762,7 +770,7 @@ function redo_all_sermons() {
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
-    $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE audiofile LIKE '%2016-02-28%' ORDER BY sermon_date ASC";
+    $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE audiofile LIKE '%2016-%' ORDER BY sermon_date ASC";
     $result = $conn->query($sql);
     while($row = mysqli_fetch_assoc($result)){
         print_r($row);
