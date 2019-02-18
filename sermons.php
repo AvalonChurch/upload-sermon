@@ -145,29 +145,28 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
         echo "$file\n^^^\n";
         $time = time();
         if (file_exists($file . '.mp3')) {
-            $old_message_mp3 = $file . '_OLD-' . $time . '.mp3';
+            $old_message_mp3 = 'bok/' . $file . '_OLD-' . $time . '.mp3';
             rename($file . '.mp3', $old_message_mp3);
             echo "rename($file . '.mp3', $old_message_mp3);";
-            echo(`ls 2012-11-0*`);
             if (!$message_mp3)
                 $message_mp3 = $old_message_mp3;
             echo "message_mp3 = $message_mp3\n";
         }
 
         if (file_exists($file . '.pptx')) {
-            $old_message_ppt = $file . '_OLD-' . $time . '.pptx';
+            $old_message_ppt = 'bak/' . $file . '_OLD-' . $time . '.pptx';
             rename($file . '.pptx', $old_message_ppt);
             if (!$message_ppt)
                 $message_ppt = $old_message_ppt;
         }
         if (file_exists($file . '.docx')) {
-            $old_message_docx = $file . '_OLD-' . $time . '.docx';
+            $old_message_docx = 'bak/' . $file . '_OLD-' . $time . '.docx';
             rename($file . '.docx', $old_message_docx);
             if (!$message_docx)
                 $message_docx = $old_message_docx;
         }
         if (file_exists($file . '.jpg')) {
-            $old_message_image = $file . '_OLD-' . $time . '.jpg';
+            $old_message_image = 'bak/' . $file . '_OLD-' . $time . '.jpg';
             rename($file . '.jpg', $old_message_image);
             if (!$message_image && ! $image_verse)
                 $message_image = $old_message_image;
@@ -326,9 +325,9 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
         'popularimeter' => array('email' => 'info@boiseccc.org', 'rating' => 128, 'data' => 0),
         'unique_file_identifier' => array('ownerid' => 'info@boiseccc.org', 'data' => md5(time())),
     );
-    echo "Updating tags in MP3 file... (see <a href=\"../$sermon_dir/$filename-tags.txt\" target=\"_blank\">tag file</a>)\n";
+    echo "Updating tags in MP3 file... (see <a href=\"../$sermon_dir/bak/$filename-tags.txt\" target=\"_blank\">tag file</a>)\n";
 //    var_dump($tag_data);
-    file_put_contents($filename . "-tags.txt", json_encode($tag_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    file_put_contents('bak/' . $filename . "-tags.txt", json_encode($tag_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     $tagwriter->tag_data = $tag_data;
 
     echo $tagwriter->filename."\n\n\n";
@@ -429,12 +428,12 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
         $sermon_id = insertIntoTable($prefix . 'sermon_sermons', $row);
         echo "Adding Sermon... ";
     }
-    echo "(see <a href=\"../$sermon_dir/$filename-row.txt\" target=\"_blank\"'>row data</a>)\n";
+    echo "(see <a href=\"../$sermon_dir/bak/$filename-row.txt\" target=\"_blank\"'>row data</a>)\n";
     deleteScriptures($sermon_id);
     makeScriptureRef($sermon_id, $scripture);
     $row['id'] = $sermon_id;
 //    var_dump($row);
-    file_put_contents($filename . "-row.txt", json_encode($row, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    file_put_contents('bak/' . $filename . "-row.txt", json_encode($row, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     echo "DONE: series: $series_id, speaker: $speaker_id, sermon: $sermon_id<br/>\n\n";
 
     $conn->close();
@@ -579,11 +578,11 @@ function makeScriptureRef($sermon_id, $scripture)
     foreach($order as $script) {
         insertIntoTable($prefix . 'sermon_scriptures', $refs[$script]);
     }
-    echo "Adding Scripture References... (see <a href=\"../$sermon_dir/$filename-refs.txt\" target=\"_blank\">scripture refs</a>)\n";
-    file_put_contents($filename . "-refs.txt", json_encode($refs, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+    echo "Adding Scripture References... (see <a href=\"../$sermon_dir/bak/$filename-refs.txt\" target=\"_blank\">scripture refs</a>)\n";
+    file_put_contents('bak/ ' . $filename . "-refs.txt", json_encode($refs, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
     if (count($bad_refs)) {
-        echo "Has bad Scripture References! (see <a href=\"../$sermon_dir/$filename-bad_refs.txt\" target=\"_blank\">bad refs</a>)\n";
-        file_put_contents($filename . "-bad_refs.txt", json_encode($bad_refs, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        echo "Has bad Scripture References! (see <a href=\"../$sermon_dir/bak/$filename-bad_refs.txt\" target=\"_blank\">bad refs</a>)\n";
+        file_put_contents('bak/' . $filename . "-bad_refs.txt", json_encode($bad_refs, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
 }
 
