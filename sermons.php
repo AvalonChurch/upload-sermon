@@ -405,8 +405,9 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     $main_scripture = cleanUpScripture($main_scripture);
     echo "MAIN SCRIPTURE: $main_scripture\n";
     print_r($docx_scriptures);
+    echo "------------\n";
     print_r($pptx_scriptures);
-    die();
+    die("\n");
 
     $series_id = makeSeries($series, $catid);
     $speaker_id = makeSpeaker($speaker, $catid);
