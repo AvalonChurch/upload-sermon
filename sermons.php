@@ -24,6 +24,7 @@ function getEnglishTitle($title) {
     $title = preg_replace('/^201\d-\d+-\d+ */', '', $title);
     $title = preg_replace('/^([\x00-\x7F]+)[^\x00-\x7F].*/', '$1', $title);
     $title = trim(explode(' - ', $title)[0];
+    echo "ENGLISH: $title\n";
     return $title;
 }
 
@@ -31,6 +32,7 @@ function getChineseTitle($title) {
     $title = preg_replace('/^201\d-\d+-\d+ */', '', $title);
     $title = preg_replace('/^[\x00-\x7F]*([^\x00-\x7f].*)/', '$1', $title);
     $title = trim(explode(' - ', $title)[0]);
+    echo "CHINESE: $title\n";
     return $title;
 }
 
@@ -387,6 +389,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
     $info = $getID3->analyze($message_mp3);
     $sermon_time = format_duration($info['playtime_string']);
     $title = $title_english . ($title_chinese?' ' . $title_chinese:'');
+    die($title);
     $alias = strtolower($filename);
     $creation_date = date("Y-m-d H:i:s");
 
