@@ -244,7 +244,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
         if(! $catid)
             $catid = $existing_row['catid'];
     } else {
-        echo $filename . ".mp3 is new!<br/>\n\n";
+        echo $filename . ".mp3 is new!\n\n";
 
         if(!$speaker){
             $speaker = "Barnabas Feng"; // default
@@ -360,12 +360,12 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
 
     echo $tagwriter->filename."\n\n\n";
     if ($tagwriter->WriteTags()) {
-        echo 'Successfully wrote tags<br>';
+        echo "Successfully wrote tags.\n";
         if (!empty($tagwriter->warnings)) {
-            echo 'There were some warnings:<br>' . implode('<br><br>', $tagwriter->warnings);
+            echo "There were some warnings:\n" . implode("\n", $tagwriter->warnings);
         }
     } else {
-        die('Failed to write tags!<br>' . implode('<br><br>', $tagwriter->errors));
+        die("Failed to write tags! Errors:\n" . implode("\n", $tagwriter->errors));
     }
 
     if (! $main_scripture && $scriptures)
@@ -462,7 +462,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
     $row['id'] = $sermon_id;
 //    var_dump($row);
     file_put_contents('bak/' . $filename . "-row.txt", json_encode($row, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-    echo "DONE: series: $series_id, speaker: $speaker_id, sermon: $sermon_id<br/>\n\n";
+    echo "DONE: series: $series_id, speaker: $speaker_id, sermon: $sermon_id\n\n";
 
     $conn->close();
 
@@ -492,7 +492,7 @@ function makeSeries($title, $catid)
 {
 	global $prefix, $conn;
 	$sql = "SELECT * from " . $prefix . "sermon_series WHERE title = \"" . $title . "\"";
-//	echo $sql . "<br/>\n\n";
+//	echo $sql . "\n\n";
 	$result = $conn->query($sql);
 	$row = mysqli_fetch_assoc($result);
 	if ($row) {
@@ -515,7 +515,7 @@ function makeSpeaker($title, $catid)
 {
 	global $prefix, $conn;
 	$sql = "SELECT * from " . $prefix . "sermon_speakers WHERE title = \"" . $title . "\"";
-//	echo $sql . "<br/>\n\n";
+//	echo $sql . "\n\n";
 	$result = $conn->query($sql);
 	$row = mysqli_fetch_assoc($result);
 	if ($row) {
@@ -548,9 +548,9 @@ function insertIntoTable($table, $row)
 		$values[] = mysqli_real_escape_string($conn, $value);
 	}
 	$sql = 'INSERT INTO `' . $table . '` (' . implode($fields, ',') . ') VALUES ("' . implode($values, '","') . '")';
-//	echo $sql . "<br/>\n\n";
+//	echo $sql . "\n\n";
 	$conn->query($sql);
-//	echo $conn->insert_id . "<br/>\n\n";
+//	echo $conn->insert_id . "\n\n";
 	return $conn->insert_id;
 }
 
@@ -561,7 +561,7 @@ function updateTable($table, $row, $id) {
         $sets[] = "$field = \"".mysqli_real_escape_string($conn, $value)."\"";
     }
     $sql = 'UPDATE `' . $table . '` SET '.implode(',', $sets).' WHERE id = '.$id;
-//    echo $sql . "<br/>\n\n";
+//    echo $sql . "\n\n";
     $conn->query($sql);
     return $id;
 }
@@ -569,7 +569,7 @@ function updateTable($table, $row, $id) {
 function deleteScriptures($id) {
     global $conn, $prefix;
     $sql = 'DELETE FROM `' . $prefix . 'sermon_scriptures` WHERE sermon_id = '.$id;
-//    echo $sql . "<br/>\n\n";
+//    echo $sql . "\n\n";
     $conn->query($sql);
     return $id;
 }
@@ -716,10 +716,10 @@ function makeImage($basename, $scripture)
     $command = "wget -O $basename $(curl https://biblepic.com/$scripturePath.htm | lynx --dump -listonly -stdin | sed -r 's/^\s*[0-9]+\. file:\/\/localhost/https:\/\/biblepic.com/' | grep jpg)";
     // MAC:
 //    $command = "curl -o $basename $(curl https://biblepic.com/$scripturePath.htm | /usr/local/bin/lynx --dump -listonly -stdin | /usr/local/bin/gsed -r 's/^\s*[0-9]+\. file:\/\//https:\/\/biblepic.com/' | grep jpg)";
-//	echo $command . "\n";
+	echo $command . "\n";
 	exec($command . " 2>&1", $output, $ret);
-//	var_dump($output);
-//    var_dump($ret);
+	var_dump($output);
+    var_dump($ret);
 	if(!file_exists($basename)) {
 	    die('NO '.$basename);
     }
