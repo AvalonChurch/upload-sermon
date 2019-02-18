@@ -629,6 +629,7 @@ function makeScriptureRef($sermon_id, $scripture)
             $scripts = array($script);
         }
         foreach($scripts as $s) {
+            $s = cleanUpScripture($s);
             $ref = getScriptureRef($s);
             if ($ref && $ref['book']) {
                 $ref['sermon_id'] = $sermon_id;
