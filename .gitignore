@@ -1,0 +1,6 @@
+*
+!.gitignore
+!*.php
+!no_recording.mp3
+!getid3
+

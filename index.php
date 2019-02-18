@@ -227,7 +227,11 @@ if(isset($_POST['submit'])) {
                 loadFile(objectUrl, function(err,content){
                     var zip = new JSZip(content);
                     var doc=new window.docxtemplater().loadZip(zip);
-                    text=doc.getFullText();
+                    var text = doc.getFullText();
+                    var title = text.split(/201/)[0];
+                    if(!$('#title-chinese').length)
+                        $('#title-chinese').val(title);
+                    console.log(title);
                     var re = /【([^】]+)】/g;
                     var m;
                     var verses = [];

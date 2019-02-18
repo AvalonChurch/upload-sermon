@@ -1,6 +1,7 @@
 <?php
 mysqli_report(MYSQLI_REPORT_ERROR);
 require_once('books.php');
+require_once('docx.php');
 $testing = true;
 $encoding = 'UTF-8';
 require_once('getid3/getid3/getid3.php');
@@ -19,7 +20,44 @@ $conn = null;
 $filename = null;
 $sermon_dir = null;
 
-function makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $title_english, $title_chinese, $date, $catid, $series, $speaker, $scripture, $scriptures, $image_verse)
+function getEnglishTitle($title) {
+    return preg_replace('/^201\d-\d+-\d+ /', '', trim(explode(' - ', preg_replace('/^([\x20-\x7f]+)[^\x20-\x7f].*/', '$1', $title))[0]));
+}
+
+function getChineseTitle($title) {
+    return trim(explode(' - ', preg_replace('/^[\x20-\x7f]*([^\x20-\x7f].*)/', '$1', $title))[0]);
+}
+
+function getChineseTitleFromDocx($docx_file) {
+    try {
+        $docText = RD_Text_Extraction::convert_to_text($docx_file);
+        $lines = explode("\n", $docText);
+        if (getChineseTitle($lines[0])) {
+            return getChineseTitle($lines[0]);
+        } else if (getChineseTitle($lines[1])) {
+            return getChineseTitle($lines[1]);
+        }
+    } catch (Exception $e) {
+        echo $e->getMessage();
+    }
+    return "";
+}
+
+function setSermonDir($catid) {
+    global $sermon_dir;
+    if ($catid !== 21) {
+        $sermon_dir = 'sermonspeaker/sermons';
+    } else {
+        $sermon_dir = 'sermonspeaker/friday';
+    }
+    if (!file_exists($sermon_dir)) {
+        mkdir('../' . $sermon_dir, 0777, true);
+    }
+    echo "$sermon_dir\n\n";
+    chdir('../' . $sermon_dir);
+}
+
+function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $message_docx = null, $message_image = null, $title_english = null, $title_chinese = null, $catid = null, $series = null, $speaker = null, $scripture = null, $scriptures = null, $image_verse = null)
 {
     global $conn,
            $server_name,
@@ -34,21 +72,15 @@ function makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $
            $sermon_dir,
            $getID3;
 
-    if (!$speaker || !$series || !$catid || !$date || !$title_english || !$title_chinese)
-        die('Invalid data!');
-
-    $filename = date('Y-m-d', strtotime($date)) . '_' . trim(preg_replace('/[^A-Za-z0-9_-]/', '-', $title_english)) . '_BCCC';
-
-    if ($catid !== 21) {
-        $sermon_dir = 'sermonspeaker/sermons';
-    } else {
-        $sermon_dir = 'sermonspeaker/friday';
+    if (!$date) {
+        $date_pattern = '/^(201\d-\d+-\d+).*/';
+        if($message_mp3 && preg_match($date_pattern, $message_mp3))
+            $date = preg_replace($date_pattern, '$1', $message_mp3);
+        if(!$date) {
+            echo "A date must be provided, and if nothing else, it must be an existing sermon.\n";
+            return;
+        }
     }
-
-    if (!file_exists($sermon_dir)) {
-        mkdir('../' . $sermon_dir, 0777, true);
-    }
-    chdir('../' . $sermon_dir);
 
     // Create connection
     $conn = new mysqli($server_name, $username, $password, $db_name);
@@ -57,7 +89,7 @@ function makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
-    $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE audiofile LIKE '/" . $sermon_dir . "/" . $date . "_%_BCCC.mp3'";
+    $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE audiofile LIKE '%/" . $date . "_%.mp3'";
     $result = $conn->query($sql);
     $existing_row = mysqli_fetch_assoc($result);
     $old_message_mp3 = null;
@@ -67,36 +99,148 @@ function makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $
 
     if ($existing_row) {
         echo "This date (".$date.") already has a sermon that exists, so updating it...\n";
-//        echo "HAVE ROW:\n";
-//        var_dump($existing_row);
-        $time = time();
+
+        if (!$catid) {
+            $catid = $existing_row['catid'];
+        }
+        setSermonDir($catid);
+
         $file = pathinfo($existing_row['audiofile'])['filename'];
+        $info = $getID3->analyze($file.'.mp3');
+        if($info) {
+            if (!$series)
+                $series = $info['tags']['id3v2']['album'][0];
+            if (!$speaker)
+                $speaker = $info['tags']['id3v2']['artist'][0];
+//            if (! $scriptures)
+//              $scriptures = $info['tags']['id3v2']['comment'][0];
+            $tag_title = $info['tags']['id3v2']['title'][0];
+            if (!$title_english)
+                $title_english = getEnglishTitle($tag_title);
+            if (!$title_chinese)
+                $title_chinese = getChineseTitle($tag_title);
+        }
+        if(!$title_english) {
+            $title_english = getEnglishTitle($existing_row['title']);
+        }
+        if(!$title_chinese) {
+            $title_chinese = getChineseTitle($existing_row['title']);
+            if(!$title_chinese && file_exists($file.'.docx')) {
+                $title_chinese = getChineseTitleFromDocx($file.'.docx');
+            }
+        }
+
+        $filename = date('Y-m-d', strtotime($date)) . '_' . trim(preg_replace('/[^A-Za-z0-9_ -]/', '-', $title_english)) . '_BCCC';
+
+        $time = time();
         if (file_exists($file . '.mp3')) {
             $old_message_mp3 = $file . '_OLD-' . $time . '.mp3';
             rename($file . '.mp3', $old_message_mp3);
+            if (!$message_mp3)
+                $message_mp3 = $old_message_mp3;
         }
+
         if (file_exists($file . '.pptx')) {
             $old_message_ppt = $file . '_OLD-' . $time . '.pptx';
             rename($file . '.pptx', $old_message_ppt);
+            if (!$message_ppt)
+                $message_ppt = $old_message_ppt;
         }
         if (file_exists($file . '.docx')) {
             $old_message_docx = $file . '_OLD-' . $time . '.docx';
             rename($file . '.docx', $old_message_docx);
+            if (!$message_docx)
+                $message_docx = $old_message_docx;
         }
         if (file_exists($file . '.jpg')) {
             $old_message_image = $file . '_OLD-' . $time . '.jpg';
             rename($file . '.jpg', $old_message_image);
+            if (!$message_image && ! $image_verse)
+                $message_image = $old_message_image;
         }
+
+        if (!$message_mp3 || !file_exists($message_mp3))
+            $message_mp3 = ($old_message_mp3 ? $old_message_mp3 : '../../no_recording.mp3');
+
+        if ($message_mp3 && file_exists($message_mp3)) {
+            copy($message_mp3, $filename . '.mp3');
+            $message_mp3 = $filename . '.mp3';
+        }
+
+        if (!$message_ppt || !file_exists($message_ppt)) {
+            $message_ppt = ($old_message_ppt ? $old_message_ppt : null);
+        }
+        if ($message_ppt && file_exists($message_ppt)) {
+            copy($message_ppt, $filename . '.pptx');
+            $message_ppt = $filename . '.pptx';
+        }
+
+        if (!$message_docx || !file_exists($message_docx) && $old_message_docx) {
+            $message_docx = $old_message_docx;
+        }
+        if ($message_docx && file_exists($message_docx)) {
+            copy($message_docx, $filename . '.docx');
+            $message_docx = $filename . '.docx';
+        }
+
+        if ((!$message_image || !file_exists($message_image)) && $image_verse == null) {
+            $message_image = ($old_message_image ? $old_message_image : null);
+        }
+        if ($message_image && file_exists($message_image)) {
+            copy($message_image, $filename . '.jpg');
+            $message_image = $filename . '.jpg';
+        }
+
+        if(! $speaker) {
+            $sql = "SELECT * FROM " . $prefix . "sermon_speakers WHERE id = " . $existing_row['speaker_id'];
+            $result = $conn->query($sql);
+            $speaker_row = mysqli_fetch_assoc($result);
+            if ($speaker_row)
+                $speaker = $speaker_row['title'];
+        }
+        if(! $series) {
+            $sql = "SELECT * FROM " . $prefix . "sermon_series WHERE id = " . $existing_row['series_id'];
+            $result = $conn->query($sql);
+            $series_row = mysqli_fetch_assoc($result);
+            if ($series_row)
+                $series = $series_row['title'];
+        }
+        if(! $catid)
+            $catid = $existing_row['catid'];
     } else {
         echo $filename . ".mp3 is new!<br/>\n\n";
+
+        if(!$speaker){
+            $speaker = "Barnabas Feng"; // default
+        }
+        if(!$series) {
+            $series = "Matthew"; // default
+        }
+        if(! $catid) {
+            $catid = 19; // Sunday Sermon
+        }
+        setSermonDir($catid);
+
+        if(!$title_english) {
+            echo "An English Title must be provided for new sermons";
+            return;
+        }
+        if(!$title_chinese && ! $message_docx) {
+            echo "A Chinese Title must be provided for new sermons";
+            return;
+        }
+    }
+
+    if (!$filename) {
+        $filename = date('Y-m-d', strtotime($date)) . '_' . trim(preg_replace('/[^A-Za-z0-9_ -]/', '-', $title_english)) . '_BCCC';
     }
 
     if (!$message_mp3 || !file_exists($message_mp3)) {
-        $message_mp3 = ($old_message_mp3 ? $old_message_mp3 : '../../no_recording.mp3');
+        $message_mp3 = ($old_message_mp3 ? $old_message_mp3 : '../../upload-sermon/no_recording.mp3');
     }
 
     if ($message_mp3) {
-        $ret = copy($message_mp3, $filename . '.mp3');
+        copy($message_mp3, $filename . '.mp3');
         $message_mp3 = $filename . '.mp3';
     }
 
@@ -124,17 +268,8 @@ function makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $
         $message_image = $filename . '.jpg';
     }
 
-    if($old_message_mp3) {
-        $info = $getID3->analyze($old_message_mp3);
-        if (! $series)
-            $series = $info['tags']['id3v2']['album'][0];
-        if (! $speaker)
-            $speaker = $info['tags']['id3v2']['artist'][0];
-        if (! $scriptures)
-            $scriptures = $info['tags']['id3v2']['comment'][0];
-        if (! $title_english)
-            $title_english = $info['tags']['id3v2']['title'][0];
-    }
+    if(!$title_english)
+        $title_english = "Sermon";
 
     $tagwriter = new getid3_writetags;
     $tagwriter->filename = $message_mp3;
@@ -143,13 +278,23 @@ function makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $
     $tagwriter->remove_other_tags = false; // if true removes other tag formats (e.g. ID3v1, ID3v2, APE, Lyrics3, etc) that may be present in the file and only write the specified tag format(s). If false leaves any unspecified tag formats as-is.
     $tagwriter->tag_encoding = $encoding;
 
+    if(!$scriptures && $message_docx) {
+        try {
+            $docText = RD_Text_Extraction::convert_to_text($message_docx);
+            preg_match_all('/【([^】]+)】/', $docText, $matches, PREG_PATTERN_ORDER);
+            $scriptures = implode("\n", $matches[1]);
+        } catch(Exception $e) {
+            echo $e->getMessage();
+        }
+    }
+
     $scriptures = preg_replace('/  +/', ' ', $scriptures); # Removes any double spaces
     if(! $scriptures || strpos($scriptures, $scripture) === false) {
         $scriptures = $scripture.($scriptures?"\n".$scriptures:"");
     }
 
     $tag_data = array(
-        'title' => array($title_english . ' ' . $title_chinese . ' - ' . $date),
+        'title' => array($title_english . ($title_chinese?' - ' . $title_chinese:'') . ' - ' . $date),
         'artist' => array($speaker),
         'album' => array($series),
         'year' => array(date('Y', strtotime($date))),
@@ -195,6 +340,13 @@ function makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $
         $add_file_desc = 'PowerPoint Slides';
     }
     if (file_exists($message_docx)) {
+        if( ! $title_chinese) {
+//$docObj = new DocxConversion("test.docx");
+//$docObj = new DocxConversion("test.xlsx");
+//$docObj = new DocxConversion("test.pptx");
+            $title_chinese = getChineseTitleFromDocx($message_docx);
+        }
+
         $body_lines[] = '{google_docs}/' . $sermon_dir . '/' . basename($message_docx) . $docx_settings . '{/google_docs}';
         if (!$add_file) {
             $add_file = '/' . $sermon_dir . '/' . basename($message_docx);
@@ -216,7 +368,7 @@ function makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $
 
     $info = $getID3->analyze($message_mp3);
     $sermon_time = format_duration($info['playtime_string']);
-    $title = $title_english . ' ' . $title_chinese;
+    $title = $title_english . ($title_chinese?' ' . $title_chinese:'');
     $alias = strtolower($filename);
     $creation_date = date("Y-m-d H:i:s");
 
@@ -513,4 +665,23 @@ function makeImage($basename, $scripture)
 	    die('NO '.$basename);
     }
 	return "$basename.jpg";
+}
+
+function redo_all_sermons() {
+    global $conn, $server_name, $username, $password, $db_name, $prefix;
+
+    $conn = new mysqli($server_name, $username, $password, $db_name);
+    $conn->set_charset('utf8');
+    // Check connection
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+    $sql = "SELECT * FROM " . $prefix . "sermon_sermons ORDER BY sermon_date ASC";
+    $result = $conn->query($sql);
+    while($row = mysqli_fetch_assoc($result)){
+        $date = date('Y-m-d', strtotime($row['sermon_date']));
+        echo $date."\n\n";
+        makeSermon($date);
+        print("----------------------------------\n");
+    }
 }
