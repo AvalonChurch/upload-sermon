@@ -355,7 +355,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
     }
 
     $body_lines = array();
-    if($scriptures)
+    if(trim($scriptures))
         $body_lines[] = '<p>經文 Scripture:<ul><li>'.preg_replace('/ *\n */', '</li><li>', $scriptures).'</li></ul></p>';
     $add_file = '';
     $add_file_desc = '';
@@ -364,6 +364,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
         $add_file = '/' . $sermon_dir . '/' . basename($message_ppt);
         $add_file_desc = 'PowerPoint Slides';
     }
+    echo "BODY LINES: ".print_r($body_lines, TRUE);
     if (file_exists($message_docx)) {
         if( ! $title_chinese) {
 //$docObj = new DocxConversion("test.docx");
@@ -428,7 +429,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
         $sermon_id = insertIntoTable($prefix . 'sermon_sermons', $row);
         echo "Adding Sermon... ";
     }
-    echo "(see <a href=\"../$sermon_dir/$filename-row.txt\" target=\"_blank\"'>row data</a>\n";
+    echo "(see <a href=\"../$sermon_dir/$filename-row.txt\" target=\"_blank\"'>row data</a>)\n";
     deleteScriptures($sermon_id);
     makeScriptureRef($sermon_id, $scripture);
     $row['id'] = $sermon_id;
