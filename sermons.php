@@ -715,6 +715,5 @@ function redo_all_sermons() {
         echo $date."\n\n";
         makeSermon($date);
         print("----------------------------------\n");
-        die();
     }
 }
