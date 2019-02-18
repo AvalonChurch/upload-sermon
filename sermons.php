@@ -58,7 +58,7 @@ function setSermonDir($catid) {
     } else {
         $sermon_dir = 'sermonspeaker/friday';
     }
-    if (!file_exists($sermon_dir)) {
+    if (!file_exists('../' . $sermon_dir)) {
         mkdir('../' . $sermon_dir, 0777, true);
     }
     echo "SERMON DIR: $sermon_dir\n\n";
