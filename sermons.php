@@ -92,7 +92,7 @@ function cleanUpScripture($scripture) {
     $scripture = preg_replace('/  +/', ' ', $scripture);
     $scripture = trim($scripture);
     if(! preg_match('/[A-Z]/', $scripture)) {
-        $scripture = preg_replace_callback('/【(^[0-9abc ,;-]+)(.*)】/', function ($matches) {
+        $scripture = preg_replace_callback('/【([^0-9abc ,;-]+)(.*)】/', function ($matches) {
             global $chineseToEnglish;
             print_r($matches);
             if($matches && $chineseToEnglish[$matches[1]])
