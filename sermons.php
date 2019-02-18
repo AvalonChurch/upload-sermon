@@ -89,6 +89,7 @@ function cleanUpScripture($scripture) {
     $scripture = preg_replace('/: +/', ':', $scripture);
     $scripture = preg_replace('/；/', '; ', $scripture);
     $scripture = preg_replace('/([^A-Za-z0-9: ,;_【】\n-])([A-Za-z0-9])/', '$1 $2', $scripture);
+    $scripture = preg_replace('/  +/', ' ', $scripture);
     $scripture = trim($scripture);
     return $scripture;
 }
@@ -346,16 +347,14 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
         }
     }
 
-    $docx_scriptures = preg_replace('/  +/', ' ', $docx_scriptures); # Removes any double spaces
+    $docx_scriptures = cleanUpScripture($docx_scriptures);
+    $pptx_scriptures = cleanUpScripture($pptx_scriptures);
 
     if($main_scripture && ! $docx_scriptures) {
         $docx_scriptures = $main_scripture;
         if (strpos($docx_scriptures, "【") === false)
             $docx_scriptures = "【" . $docx_scriptures . "】";
     }
-
-    $docx_scriptures = cleanUpScripture($docx_scriptures);
-    $pptx_scriptures = cleanUpScripture($pptx_scriptures);
 
     $comment = "";
     if($docx_scriptures)
@@ -406,6 +405,8 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     $main_scripture = cleanUpScripture($main_scripture);
     echo "MAIN SCRIPTURE: $main_scripture\n";
     print_r($docx_scriptures);
+    print_r($pptx_scriptures);
+    die();
 
     $series_id = makeSeries($series, $catid);
     $speaker_id = makeSpeaker($speaker, $catid);
@@ -791,7 +792,7 @@ function redo_all_sermons() {
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
-    $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE audiofile LIKE '%201%' ORDER BY sermon_date ASC";
+    $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE audiofile LIKE '%2016-11-06%' ORDER BY sermon_date ASC";
     $result = $conn->query($sql);
     while($row = mysqli_fetch_assoc($result)){
         print_r($row);
