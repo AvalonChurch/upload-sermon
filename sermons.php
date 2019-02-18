@@ -327,7 +327,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
         try {
             $docxText = RD_Text_Extraction::convert_to_text($message_docx);
             preg_match_all('/【(.*?)】/', $docxText, $matches, PREG_PATTERN_ORDER);
-            $docx_scriptures = implode("\n", array_slice($matches[0], 1));
+            $docx_scriptures = implode("\n", $matches[0]);
         } catch(Exception $e) {
             echo $e->getMessage();
         }
@@ -338,11 +338,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
             $pptxText = RD_Text_Extraction::convert_to_text($message_pptx);
             echo "$pptxText\n\n\n";
             preg_match_all('/【(.*?)】/', $pptxText, $matches, PREG_PATTERN_ORDER);
-            $pptx_scriptures = implode("\n", array_slice($matches[0], 1));
-            print_r($matches);
-            echo "-=====\n";
-            print_r($pptx_scriptures);
-            echo "=====\n";
+            $pptx_scriptures = implode("\n", $matches[0]);
             if(!$message_docx) {
                 $docx_scriptures = $pptx_scriptures;
                 $pptx_scriptures = "";
@@ -409,10 +405,6 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     $main_scripture = preg_replace('/】/', '', $main_scripture);
     $main_scripture = cleanUpScripture($main_scripture);
     echo "MAIN SCRIPTURE: $main_scripture\n";
-    print_r($docx_scriptures);
-    echo "------------\n";
-    print_r($pptx_scriptures);
-    die("\n");
 
     $series_id = makeSeries($series, $catid);
     $speaker_id = makeSpeaker($speaker, $catid);
