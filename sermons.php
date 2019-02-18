@@ -80,6 +80,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
            $sermon_dir,
            $getID3;
 
+    $myDir = `pwd`;
     if (!$date) {
         $date_pattern = '/^(201\d-\d+-\d+).*/';
         if($message_mp3 && preg_match($date_pattern, $message_mp3))
@@ -434,6 +435,10 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
     echo "DONE: series: $series_id, speaker: $speaker_id, sermon: $sermon_id<br/>\n\n";
 
     $conn->close();
+
+    $sermon_dir = null;
+    $filename = null;
+    chdir($myDir);
 }
 
 // Format to AA::BB:CC
@@ -464,7 +469,7 @@ function makeSeries($title, $catid)
 	} else {
 		$row = array(
 			'title' => $title,
-			'alias' => strtolower(str_replace(' ', '-', trim(preg_replace('/[^A-Za-z0-9 _-]/', '', $title)))),
+			'alias' => strtolower(str_replace(' ', '-', trim(preg_replace('/[^A-Za-z0-9_-]/', '', $title)))),
 			'state' => 1,
 			'created' => date('Y-m-d H:i:s'),
 			'created_by' => 648,
@@ -705,8 +710,6 @@ function redo_all_sermons() {
         print_r($row);
         $date = date('Y-m-d', strtotime($row['sermon_date']));
         echo $date."\n\n";
-        $sermon_dir = null;
-        $filename = null;
         makeSermon($date);
         print("----------------------------------\n");
     }
