@@ -29,8 +29,10 @@ function getEnglishTitle($title) {
 }
 
 function getChineseTitle($title) {
+    $english = getEnglishTitle($title);
     $title = preg_replace('/^201\d-\d+-\d+ */', '', $title);
-    $title = preg_replace('/^[\x00-\x7F]*([^\x00-\x7f].*)/', '$1', $title);
+    $title = str_replace($english, '', $title);
+    $title = preg_replace('/^[\x00-\x7F]*([^\x00-\x7f]+.*)/', '$1', $title);
     $title = trim(explode(' - ', $title)[0]);
     echo "CHINESE: $title\n";
     return $title;
