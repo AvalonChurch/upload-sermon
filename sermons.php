@@ -338,11 +338,11 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     }
 
     $docx_scriptures = preg_replace('/  +/', ' ', $docx_scriptures); # Removes any double spaces
-    if($main_scripture && (strpos($docx_scriptures, $main_scripture) === false)) {
-        $s = $main_scripture;
-        if (strpos($s, "【") === false)
-            $s = "【" . $s . "】";
-        $docx_scriptures = $s . ($docx_scriptures?"\n".$docx_scriptures:"");
+
+    if($main_scripture && ! $docx_scriptures) {
+        $docx_scriptures = $main_scripture;
+        if (strpos($docx_scriptures, "【") === false)
+            $docx_scriptures = "【" . $docx_scriptures . "】";
     }
 
     $comment = "";
@@ -389,8 +389,12 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
         else if ($docx_scriptures)
             $main_scripture = explode("\n", $docx_scriptures)[0];
     }
-    $main_scripture = trim(preg_replace('/【(.*?)】/', '$1', $main_scripture));
+    $main_scripture = preg_replace('/【/', '', $main_scripture);
+    $main_scripture = preg_replace('/】/', '', $main_scripture);
     $main_scripture = preg_replace('/：/', ':', $main_scripture);
+    $main_scripture = preg_replace('/, /', ',', $main_scripture);
+    $main_scripture = trim($main_scripture);
+
     $series_id = makeSeries($series, $catid);
     $speaker_id = makeSpeaker($speaker, $catid);
     if (!$message_image || ! file_exists($message_image)) {
