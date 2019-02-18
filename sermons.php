@@ -640,6 +640,16 @@ function makeScriptureRef($sermon_id, $scripture)
                 }
             } else {
                 $bad_refs[] = $s;
+                $s = trim(explode(',', $s)[0]);
+                $s = trim(explode(';', $s)[0]);
+                $ref = getScriptureRef($s);
+                if ($ref && $ref['book']) {
+                    $ref['sermon_id'] = $sermon_id;
+                    if (!isset($refs[$s])) {
+                        $refs[$s] = $ref;
+                        $order[] = $s;
+                    }
+                }
             }
         }
     }
@@ -781,7 +791,7 @@ function redo_all_sermons() {
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
-    $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE audiofile LIKE '%201%' ORDER BY sermon_date ASC";
+    $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE audiofile LIKE '%2016-11-27%' ORDER BY sermon_date ASC";
     $result = $conn->query($sql);
     while($row = mysqli_fetch_assoc($result)){
         print_r($row);
