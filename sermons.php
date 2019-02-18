@@ -339,6 +339,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
             echo "$pptxText\n\n\n";
             preg_match_all('/【(.*?)】/', $pptxText, $matches, PREG_PATTERN_ORDER);
             $pptx_scriptures = implode("\n", array_slice($matches[0], 1));
+            print_r($matches);
             echo "-=====\n";
             print_r($pptx_scriptures);
             echo "=====\n";
