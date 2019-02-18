@@ -65,6 +65,14 @@ function setSermonDir($catid) {
     $ret = chdir('../' . $sermon_dir);
 }
 
+function getFileTitle($title) {
+    $title = substr($title, 0, 40);
+    $title = implode('-', array_slice(explode(' ', $title), 0, -1));
+    $title = trim(preg_replace('/[^A-Za-z0-9_-]/', '-', $title));
+    $title = preg_replace('/-+/', '-', $title);
+    return $title;
+}
+
 function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $message_docx = null, $message_image = null, $title_english = null, $title_chinese = null, $catid = null, $series = null, $speaker = null, $scripture = null, $scriptures = null, $image_verse = null)
 {
     global $conn,
@@ -139,13 +147,13 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
             }
         }
 
-        $filename = date('Y-m-d', strtotime($date)) . '_' . trim(preg_replace('/[^A-Za-z0-9_-]/', '-', $title_english)) . '_BCCC';
+        $filename = date('Y-m-d', strtotime($date)) . '_' . getFileTitle($title_english) . '_BCCC';
 
         echo `pwd`."\n";
         echo "$file\n^^^\n";
         $time = time();
         if (file_exists($file . '.mp3')) {
-            $old_message_mp3 = 'bok/' . $file . '_OLD-' . $time . '.mp3';
+            $old_message_mp3 = 'bak/' . $file . '_OLD-' . $time . '.mp3';
             rename($file . '.mp3', $old_message_mp3);
             echo "rename($file . '.mp3', $old_message_mp3);";
             if (!$message_mp3)
@@ -252,9 +260,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
         }
     }
 
-    if (!$filename) {
-        $filename = date('Y-m-d', strtotime($date)) . '_' . trim(preg_replace('/[^A-Za-z0-9_-]/', '-', $title_english)) . '_BCCC';
-    }
+    $filename = date('Y-m-d', strtotime($date)) . '_' . getFileTitle($title_english) . '_BCCC';
 
     if (!$message_mp3 || !file_exists($message_mp3)) {
         $message_mp3 = ($old_message_mp3 ? $old_message_mp3 : '../../upload-sermon/no_recording.mp3');
