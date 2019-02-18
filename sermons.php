@@ -336,8 +336,12 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     if($message_pptx && file_exists($message_pptx)) {
         try {
             $pptxText = RD_Text_Extraction::convert_to_text($message_pptx);
+            echo "$pptxText\n\n\n";
             preg_match_all('/【(.*?)】/', $pptxText, $matches, PREG_PATTERN_ORDER);
             $pptx_scriptures = implode("\n", array_slice($matches[0], 1));
+            echo "-=====\n";
+            print_r($pptx_scriptures);
+            echo "=====\n";
             if(!$message_docx) {
                 $docx_scriptures = $pptx_scriptures;
                 $pptx_scriptures = "";
