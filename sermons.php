@@ -322,13 +322,25 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
         $scriptures = $scripture.($scriptures?"\n".$scriptures:"");
     }
 
+    $comment = "";
+    if($scriptures)
+        $comment = "經文 Scripture:\n * ".preg_replace('/ *\n */', "\n * ", $scriptures)."\n\n";
+    if($message_docx && file_exists($message_docx)) {
+        try {
+            $comment .= "筆記 Notes:\n\n";
+            $comment .= RD_Text_Extraction::convert_to_text($message_docx);
+        } catch(Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
     $tag_data = array(
         'title' => array($title_english . ($title_chinese?' - ' . $title_chinese:'') . ' - ' . $date),
         'artist' => array($speaker),
         'album' => array($series),
         'year' => array(date('Y', strtotime($date))),
         'genre' => array('Sermons'),
-        'comment' => array($scriptures),
+        'comment' => array($comment),
         'track' => array('01'),
         'popularimeter' => array('email' => 'info@boiseccc.org', 'rating' => 128, 'data' => 0),
         'unique_file_identifier' => array('ownerid' => 'info@boiseccc.org', 'data' => md5(time())),
