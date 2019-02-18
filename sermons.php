@@ -91,6 +91,17 @@ function cleanUpScripture($scripture) {
     $scripture = preg_replace('/([^A-Za-z0-9: ,;_【】\n-])([A-Za-z0-9])/', '$1 $2', $scripture);
     $scripture = preg_replace('/  +/', ' ', $scripture);
     $scripture = trim($scripture);
+    if(! preg_match('/[A-Z]/', $scripture)) {
+        $scripture = preg_replace_callback('/【(^[0-9abc ,;-]+)(.*)】/', function ($matches) {
+            global $chineseToEnglish;
+            print_r($matches);
+            if($matches && $chineseToEnglish[$matches[1]])
+                return $matches[1].' '.$chineseToEnglish[$matches[1]].' '.trim(matches[2]);
+            else
+                return $matches[0];
+        }, $scripture);
+        echo "SPECIAL: $scripture\n";
+    }
     return $scripture;
 }
 
@@ -336,7 +347,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     if($message_pptx && file_exists($message_pptx)) {
         try {
             $pptxText = RD_Text_Extraction::convert_to_text($message_pptx);
-            preg_match_all('/【(.*?)】/', $pptxText, $matches, PREG_PATTERN_ORDER);
+            preg_match_all('/【([^】]*[0-9]+[^】]*)】/', $pptxText, $matches, PREG_PATTERN_ORDER);
             $pptx_scriptures = implode("\n", $matches[0]);
             if(!$message_docx) {
                 $docx_scriptures = $pptx_scriptures;
