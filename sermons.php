@@ -61,8 +61,9 @@ function setSermonDir($catid) {
     if (!file_exists($sermon_dir)) {
         mkdir('../' . $sermon_dir, 0777, true);
     }
-    echo "$sermon_dir\n\n";
-    chdir('../' . $sermon_dir);
+    echo "SERMON DIR: $sermon_dir\n\n";
+    $ret = chdir('../' . $sermon_dir);
+    echo "CHDIR RET: $ret\n";
 }
 
 function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $message_docx = null, $message_image = null, $title_english = null, $title_chinese = null, $catid = null, $series = null, $speaker = null, $scripture = null, $scriptures = null, $image_verse = null)
