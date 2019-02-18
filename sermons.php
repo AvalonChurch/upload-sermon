@@ -76,6 +76,7 @@ function getFileTitle($title) {
     }
     $title = trim(preg_replace('/[^A-Za-z0-9_-]/', '-', $title));
     $title = preg_replace('/-+/', '-', $title);
+    $title = preg_replace('/-+$/', '', $title);
     echo "End FileTitle: $title\n";
     return $title;
 }
