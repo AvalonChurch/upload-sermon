@@ -441,7 +441,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
 
     $sermon_dir = null;
     $filename = null;
-    $ret = chdir('../../upload-dir');
+    $ret = chdir('../../upload-sermon');
     echo "PWD: ".`pwd`."\nRET: ".print_r($ret, TRUE)."\n";
 }
 
