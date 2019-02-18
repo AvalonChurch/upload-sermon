@@ -63,7 +63,6 @@ function setSermonDir($catid) {
     }
     echo "SERMON DIR: $sermon_dir\n\n";
     $ret = chdir('../' . $sermon_dir);
-    echo "CHDIR RET: $ret\n";
 }
 
 function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $message_docx = null, $message_image = null, $title_english = null, $title_chinese = null, $catid = null, $series = null, $speaker = null, $scripture = null, $scriptures = null, $image_verse = null)
@@ -81,8 +80,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
            $sermon_dir,
            $getID3;
 
-    $myDir = `pwd`;
-    echo "MY DIR: $myDir\n";
+    echo "STARTING DIR: ".`pwd`."\n";
     if (!$date) {
         $date_pattern = '/^(201\d-\d+-\d+).*/';
         if($message_mp3 && preg_match($date_pattern, $message_mp3))
@@ -443,8 +441,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
 
     $sermon_dir = null;
     $filename = null;
-    echo "CHANGING FROM".`pwd`." TO ".$myDir."\n";
-    $ret = chdir($myDir);
+    $ret = chdir('../../upload-dir');
     echo "PWD: ".`pwd`."\nRET: ".print_r($ret, TRUE)."\n";
 }
 
