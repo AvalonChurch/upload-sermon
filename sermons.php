@@ -395,6 +395,8 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     $main_scripture = preg_replace('/，/', ',', $main_scripture);
     $main_scripture = preg_replace('/,/', ', ', $main_scripture);
     $main_scripture = trim($main_scripture);
+    echo "MAIN SCRIPTURE: $main_scripture\n";
+    print_r($docx_scriptures);
 
     $series_id = makeSeries($series, $catid);
     $speaker_id = makeSpeaker($speaker, $catid);
@@ -622,12 +624,12 @@ function makeScriptureRef($sermon_id, $scripture)
             $bad_refs[] = $script;
         }
     }
-//    print("ORDER:");
-//    var_dump($order);
-//    print("REFS:");
-//    var_dump($refs);
-//    print("BAD:");
-//    var_dump($bad_refs);
+    print("ORDER:");
+    var_dump($order);
+    print("REFS:");
+    var_dump($refs);
+    print("BAD:");
+    var_dump($bad_refs);
     foreach($order as $script) {
         insertIntoTable($prefix . 'sermon_scriptures', $refs[$script]);
     }
@@ -733,7 +735,7 @@ function makeImage($basename, $scripture)
 {
 	global $books;
 	$scriptureRef = getScriptureRef($scripture);
-//	print_r($scriptureRef);
+	print_r($scriptureRef);
 	if (!$scriptureRef || !$scriptureRef['book'] || !$books[$scriptureRef['book']] || !$scriptureRef['cap1'])
 		return null;
 	$scripturePath = str_replace(' ', '_', strtolower($books[$scriptureRef['book']][0])) . '/' . $scriptureRef['cap1'] . '-' . ($scriptureRef['vers1'] ? $scriptureRef['vers1'] : 1);
