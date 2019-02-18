@@ -364,7 +364,6 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
         $add_file = '/' . $sermon_dir . '/' . basename($message_ppt);
         $add_file_desc = 'PowerPoint Slides';
     }
-    echo "BODY LINES: ".print_r($body_lines, TRUE);
     if (file_exists($message_docx)) {
         if( ! $title_chinese) {
 //$docObj = new DocxConversion("test.docx");
@@ -389,6 +388,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
         $picture = $sermon_dir . '/' . basename($message_image);
     }
     $body = implode("<br/>\n", $body_lines);
+    echo "BODY: $body\n";
     $audio_file = '/' . $sermon_dir . '/' . basename($message_mp3);
     $audio_file_size = filesize($message_mp3);
 
