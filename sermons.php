@@ -442,8 +442,9 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
 
     $sermon_dir = null;
     $filename = null;
-    chdir($myDir);
-    echo "PWD: ".`pwd`."\n";
+    echo "CHANGING FROM".`pwd`." TO ".$myDir."\n";
+    $ret = chdir($myDir);
+    echo "PWD: ".`pwd`."\nRET: ".print_r($ret, TRUE)."\n";
 }
 
 // Format to AA::BB:CC
