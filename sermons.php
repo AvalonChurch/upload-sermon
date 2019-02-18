@@ -494,7 +494,8 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     }
     echo "(see <a href=\"../$sermon_dir/bak/$filename-row.txt\" target=\"_blank\"'>row data</a>)\n";
     deleteScriptures($sermon_id);
-    makeScriptureRef($sermon_id, $main_scripture);
+    if($main_scripture)
+        makeScriptureRef($sermon_id, $main_scripture);
     $row['id'] = $sermon_id;
 //    var_dump($row);
     file_put_contents('bak/' . $filename . "-row.txt", json_encode($row, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
