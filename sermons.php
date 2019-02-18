@@ -89,17 +89,16 @@ function cleanUpScripture($scripture) {
     $scripture = preg_replace('/: +/', ':', $scripture);
     $scripture = preg_replace('/；/', '; ', $scripture);
     $scripture = preg_replace('/([^A-Za-z0-9: ,;_【】\n-])([A-Za-z0-9])/', '$1 $2', $scripture);
-    $scripture = preg_replace('/  +/', ' ', $scripture);
+    $scripture = preg_replace_callback('/(【|^) *([^【\x00-\x7f]+) *(\d[\d:】-])/', function ($matches) {
+        global $chineseToEnglish;
+        if ($matches && $chineseToEnglish[$matches[2]])
+            return $matches[1] . $matches[2] . ' ' . $chineseToEnglish[$matches[2]] . ' ' . $matches[3];
+        else
+            return $matches[0];
+    }, $scripture);
+    $scripture = preg_replace('/【 +/', '【', $scripture);
+    $scripture = preg_replace('/ +】/', '】', $scripture);
     $scripture = trim($scripture);
-    if(! preg_match('/[A-Z]/', $scripture)) {
-        $scripture = preg_replace_callback('/(【*)([^0-9abc ,;-]+)(.*)/', function ($matches) {
-            global $chineseToEnglish;
-            if($matches && $chineseToEnglish[$matches[2]])
-                return $matches[1].$matches[2].' '.$chineseToEnglish[$matches[2]].' '.$matches[3];
-            else
-                return $matches[0];
-        }, $scripture);
-    }
     return $scripture;
 }
 
