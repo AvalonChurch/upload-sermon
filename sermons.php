@@ -391,7 +391,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
     $info = $getID3->analyze($message_mp3);
     $sermon_time = format_duration($info['playtime_string']);
     $title = $title_english . ($title_chinese?' ' . $title_chinese:'');
-    die($title);
+    echo("FINAL TITLE: $title_english |||| $title_chinese ===> $title\n");
     $alias = strtolower($filename);
     $creation_date = date("Y-m-d H:i:s");
 
