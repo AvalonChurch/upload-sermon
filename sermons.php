@@ -617,7 +617,7 @@ function makeScriptureRef($sermon_id, $scripture)
 	$bad_refs = array();
 	$order = array();
 	foreach($scriptures as $script) {
-	    $script = preg_replace('/[^A-Za-z0-9 :,_-]/', '', $script);
+	    $script = preg_replace('/[^A-Za-z0-9 :;,_-]/', '', $script);
 	    $script = trim($script);
 	    if (strpos($script, ':') === false)
     	    $script = preg_replace('/(.+)(\d+) +(\d+)/', '\1\2:\3', $script);
