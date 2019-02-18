@@ -336,7 +336,6 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     if($message_pptx && file_exists($message_pptx)) {
         try {
             $pptxText = RD_Text_Extraction::convert_to_text($message_pptx);
-            echo "$pptxText\n\n\n";
             preg_match_all('/【(.*?)】/', $pptxText, $matches, PREG_PATTERN_ORDER);
             $pptx_scriptures = implode("\n", $matches[0]);
             if(!$message_docx) {
@@ -790,7 +789,7 @@ function redo_all_sermons() {
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
-    $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE sermon_date LIKE '2016-11-06 %' ORDER BY sermon_date ASC";
+    $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE sermon_date LIKE '2017-05%' ORDER BY sermon_date ASC";
     $result = $conn->query($sql);
     while($row = mysqli_fetch_assoc($result)){
         print_r($row);
