@@ -132,10 +132,14 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
 
         $filename = date('Y-m-d', strtotime($date)) . '_' . trim(preg_replace('/[^A-Za-z0-9_ -]/', '-', $title_english)) . '_BCCC';
 
-        $time = time();
+        echo `pwd`."\n";
+        echo "$file\n^^^\n";        $time = time();
         if (file_exists($file . '.mp3')) {
             $old_message_mp3 = $file . '_OLD-' . $time . '.mp3';
             rename($file . '.mp3', $old_message_mp3);
+            echo "rename($file . '.mp3', $old_message_mp3);";
+            echo "HERE $message_mp3 THERE\n";
+            die(`ls 2012-11-04*`);
             if (!$message_mp3)
                 $message_mp3 = $old_message_mp3;
         }
@@ -309,6 +313,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
     file_put_contents($filename . "-tags.txt", json_encode($tag_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     $tagwriter->tag_data = $tag_data;
 
+    echo $tagwriter->filename."\n\n\n";
     if ($tagwriter->WriteTags()) {
         echo 'Successfully wrote tags<br>';
         if (!empty($tagwriter->warnings)) {
