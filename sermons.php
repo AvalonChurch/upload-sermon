@@ -443,7 +443,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
     $sermon_dir = null;
     $filename = null;
     chdir($myDir);
-    echo "PWD: ".`pwd`."\n":
+    echo "PWD: ".`pwd`."\n";
 }
 
 // Format to AA::BB:CC
