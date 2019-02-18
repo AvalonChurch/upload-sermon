@@ -81,6 +81,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
            $getID3;
 
     $myDir = `pwd`;
+    echo "MY DIR: $myDir\n";
     if (!$date) {
         $date_pattern = '/^(201\d-\d+-\d+).*/';
         if($message_mp3 && preg_match($date_pattern, $message_mp3))
@@ -442,6 +443,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_ppt = null, $mes
     $sermon_dir = null;
     $filename = null;
     chdir($myDir);
+    echo "PWD: ".`pwd`."\n":
 }
 
 // Format to AA::BB:CC
