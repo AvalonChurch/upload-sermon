@@ -10,9 +10,9 @@ $message_image = null;
 $title_english = '';
 $title_chinese = '';
 $date = (new DateTime)->format('Y-m-d');
-$catid = 19;
-$series = "Matthew";
-$speaker = "Barnabas Feng";
+$catid;
+$series;
+$speaker;
 $scripture = '';
 $image_verse = '';
 
