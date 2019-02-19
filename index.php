@@ -267,7 +267,7 @@ if(isset($_POST['submit'])) {
                 }
             });
 
-            $('#message-docx').change(function(){
+            $('#message-docx').change(function(e){
                 let date = getDateFromFile($(this).val());
                 let title = getTitleFromFile($(this).val());
                 if (date) {
