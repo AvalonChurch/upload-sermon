@@ -265,7 +265,7 @@ if(isset($_POST['submit'])) {
                         let singleVerse = getSingleVerse(verses);
                         if (!$('#image-verse').val().length)
                             $('#image-verse').val(singleVerse);
-                        $("#scripture-pptx").html("All verses in PPTX: <ul><li>" + verses.join("</li><li>") + "</li></uL>");
+                        $("#scripture-pptx").html("First verse in PPTX: <ul><li>" + verses.join("</li><li>") + "</li></uL>");
                     }
                 });
             });
@@ -327,7 +327,7 @@ if(isset($_POST['submit'])) {
 
     <pre>
 <?php
-    makeSermon($message_mp3, $message_pptx, $message_docx, $message_image, $title_english, $title_chinese, $date, $catid, $series, $speaker, $scripture, $scriptures, $image_verse);
+    makeSermon($date, $message_mp3, $message_pptx, $message_docx, $message_image, $title_english, $title_chinese, $catid, $series, $speaker, $scripture, $scriptures, $image_verse);
 ?>
     </pre>
 <?php endif;?>
