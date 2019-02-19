@@ -134,6 +134,7 @@ if(isset($_POST['submit'])) {
                         }
                     }
                 } while (m);
+                console.log(verses);
             });
             return verses;
         }
