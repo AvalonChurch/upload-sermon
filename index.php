@@ -301,8 +301,6 @@ if(isset($_POST['submit'])) {
             $('#speaker').on('click', clickDatalist)
                 .on('mouseleave', putValueBackFromPlaceholder, 'speaker');
         });
-
-        });
     </script>
 </head>
 <body>
