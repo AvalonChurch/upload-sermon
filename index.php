@@ -84,9 +84,9 @@ if(isset($_POST['submit'])) {
 <head>
     <title>BCCC Sermon Uploader/Updater</title>
     <style>
-        div {
-            padding-bottom: 10px;
-        }
+        /*div {*/
+            /*padding-bottom: 10px;*/
+        /*}*/
 
         label {
             display: block;
