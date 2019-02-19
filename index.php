@@ -104,6 +104,47 @@ if(isset($_POST['submit'])) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip-utils/0.0.2/jszip-utils.js"></script>
 
     <script type="text/javascript">
+        var loadFile=function(url,callback){
+            JSZipUtils.getBinaryContent(url,callback);
+        };
+
+        function getScriptureRefs(file) {
+            var objectUrl = URL.createObjectURL(file);
+            var verses = [];
+            loadFile(objectUrl, function(err,content){
+                var zip = new JSZip(content);
+                var doc=new window.docxtemplater().loadZip(zip);
+                var text = doc.getFullText();
+                var title = text.split(/201/)[0];
+                if(!$('#title-chinese').length)
+                    $('#title-chinese').val(title);
+                console.log(title);
+                var re = /【([^】]+)】/g;
+                var m;
+                do {
+                    m = re.exec(text);
+                    if (m) {
+                        var verse = m[1].trim();
+                        verse = verse.replace(/  +/g, " ");
+                        if (! verses.includes(verse)) {
+                            verses.push(verse);
+                        }
+                    }
+                } while (m);
+            });
+            return verses;
+        }
+
+        function getSingleVerse(verses) {
+            var singleVerse;
+            if (verses.length > 0) {
+                singleVerse = verses[0].replace(/[^\w :-]+/g, " ");
+                singleVerse = singleVerse.split(/[,;-]/)[0];
+                singleVerse = singleVerse.trim();
+            }
+            return singleVerse;
+        }
+
         $(document).ready(function(){
             $('input#message-mp3').change(function(){
                 var filename = $(this).val().split('\\').pop();
@@ -211,51 +252,35 @@ if(isset($_POST['submit'])) {
                 var file = e.currentTarget.files[0];
                 var objectUrl = URL.createObjectURL(file);
                 audio.src = objectUrl;
-            })
-
-            var loadFile=function(url,callback){
-                JSZipUtils.getBinaryContent(url,callback);
-            }
-            // loadFile("examples/tagExample.docx",function(err,content){
-            //     var doc=new Docxgen(content);
-            //     text=doc.getFullText();
-            //     console.log(text);
-            // });
-            $('input#message-notes').change(function(e) {
-                var file = e.currentTarget.files[0];
-                var objectUrl = URL.createObjectURL(file);
-                loadFile(objectUrl, function(err,content){
-                    var zip = new JSZip(content);
-                    var doc=new window.docxtemplater().loadZip(zip);
-                    var text = doc.getFullText();
-                    var title = text.split(/201/)[0];
-                    if(!$('#title-chinese').length)
-                        $('#title-chinese').val(title);
-                    console.log(title);
-                    var re = /【([^】]+)】/g;
-                    var m;
-                    var verses = [];
-                    do {
-                        m = re.exec(text);
-                        if (m) {
-                            var verse = m[1].trim();
-                            verse = verse.replace(/  +/g, " ");
-                            if (! verses.includes(verse)) {
-                                verses.push(verse);
-                            }
-                        }
-                    } while (m);
-                    if (verses.length > 0) {
-                        var mainVerse = verses[0];
-                        $('#scripture').val(mainVerse);
-                        var singleVerse = mainVerse.replace(/[^\w :-]+/g, " ");
-                        singleVerse = singleVerse.split(/[,;-]/)[0];
-                        singleVerse = singleVerse.trim();
-                        $('#image-verse').val(singleVerse);
-                        $("#scripture-note").html("All verses in DOCX: <ul><li>" + verses.join("</li><li>") + "</li></uL>");
-                    }
-                });
             });
+
+            $('input#message-docx').change(function(e) {
+                var file = e.currentTarget.files[0];
+                var verses = getScriptureRefs(file);
+                if (verses.length > 0) {
+                    var mainVerse = verses[0];
+                    $('#scripture').val(mainVerse);
+                    var singleVerse = getSingleVerse(verses);
+                    $('#image-verse').val(singleVerse);
+                    $("#scripture-docx").html("All verses in DOCX: <ul><li>" + verses.join("</li><li>") + "</li></uL>");
+                }
+            });
+
+            $('input#message-pptx').change(function(e) {
+                var file = e.currentTarget.files[0];
+                var verses = getScriptureRefs(file);
+                if (verses.length > 0) {
+                    var mainVerse = verses[0];
+                    if(! $('#scripture').val().length)
+                        $('#scripture').val(mainVerse);
+                        var singleVerse = getSingleVerse(verses);
+                    if(! $('#image-verse').val().elgnth)
+                        $('#image-verse').val(singleVerse);
+                    $("#scripture-pptx").html("All verses in PPTX: <ul><li>" + verses.join("</li><li>") + "</li></uL>");
+                }
+            });
+        });
+
         });
     </script>
 </head>
@@ -303,8 +328,8 @@ identifier to know if you are adding a new one or updating an existing one.</li>
     </div>
 
     <div>
-        <label for="message-notes">Message DOCX</label>
-        <input id="message-notes" name="message_docx" type="file" accept=".doc,.docx"/>
+        <label for="message-docx">Message DOCX</label>
+        <input id="message-docx" name="message_docx" type="file" accept=".doc,.docx"/>
     </div>
 
     <p/>
@@ -370,10 +395,11 @@ identifier to know if you are adding a new one or updating an existing one.</li>
         <textarea id="scripture" name="scripture" rows="5" cols="100"><?php echo $scripture?></textarea>
         <br/>
         Put each scripture reference on its own line. Please use full book name with chapter and verse(s)
-        <div id="scripture-note" style="padding-top:10px"></div>
+        <div id="scripture-docx" style="padding-top:10px;width:50%;float:left"></div>
+        <div id="scripture-pptx" style="padding-top:10px;width:50%;float:left"></div>
     </div>
 
-    <div style="border: black solid;">
+    <div style="border: black solid;clear:both;">
         <label for="image-verse">Image Verse</label>
         <input type="text" id="image-verse" name="image_verse" value="<?php echo $image_verse?>" size="20">
         <br/>
