@@ -105,15 +105,14 @@ if(isset($_POST['submit'])) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip-utils/0.0.2/jszip-utils.js"></script>
 
     <script type="text/javascript">
-        let loadFile=function(url,callback){
+        let loadFile=function(url, callback){
             JSZipUtils.getBinaryContent(url, callback);
         };
 
-        var verses = [];
-        function getScriptureRefs(file) {
+        function getScriptureRefs(file, callback) {
             let objectUrl = URL.createObjectURL(file);
-            verses = [];
-            loadFile(objectUrl, function(err,content){
+            var verses = [];
+            loadFile(objectUrl, function(err, content){
                 let zip = new JSZip(content);
                 let doc= new window.docxtemplater().loadZip(zip);
                 let text = doc.getFullText();
@@ -135,9 +134,8 @@ if(isset($_POST['submit'])) {
                         }
                     }
                 } while (m);
-                console.log(verses);
+                callback(verses);
             });
-            return verses;
         }
 
         function getSingleVerse(verses) {
@@ -257,17 +255,18 @@ if(isset($_POST['submit'])) {
 
                 // Extract scripture verses
                 let file = e.currentTarget.files[0];
-                let verses = getScriptureRefs(file);
-                console.log(verses);
-                if (verses.length > 0) {
-                    let mainVerse = verses[0];
-                    if(! $('#scripture').val().length)
-                        $('#scripture').val(mainVerse);
-                    let singleVerse = getSingleVerse(verses);
-                    if(! $('#image-verse').val().length)
-                        $('#image-verse').val(singleVerse);
-                    $("#scripture-pptx").html("All verses in PPTX: <ul><li>" + verses.join("</li><li>") + "</li></uL>");
-                }
+                getScriptureRefs(file, function(verses) {
+                    console.log(verses);
+                    if (verses.length > 0) {
+                        let mainVerse = verses[0];
+                        if (!$('#scripture').val().length)
+                            $('#scripture').val(mainVerse);
+                        let singleVerse = getSingleVerse(verses);
+                        if (!$('#image-verse').val().length)
+                            $('#image-verse').val(singleVerse);
+                        $("#scripture-pptx").html("All verses in PPTX: <ul><li>" + verses.join("</li><li>") + "</li></uL>");
+                    }
+                });
             });
 
             $('#message-docx').change(function(e){
@@ -291,15 +290,16 @@ if(isset($_POST['submit'])) {
 
                 // Extract scripture verses
                 let file = e.currentTarget.files[0];
-                let verses = getScriptureRefs(file);
-                console.log(verses);
-                if (verses.length > 0) {
-                    let mainVerse = verses[0];
-                    $('#scripture').val(mainVerse);
-                    let singleVerse = getSingleVerse(verses);
-                    $('#image-verse').val(singleVerse);
-                    $("#scripture-docx").html("All verses in DOCX: <ul><li>" + verses.join("</li><li>") + "</li></uL>");
-                }
+                getScriptureRefs(file, function(verses) {
+                    console.log(verses);
+                    if (verses.length > 0) {
+                        let mainVerse = verses[0];
+                        $('#scripture').val(mainVerse);
+                        let singleVerse = getSingleVerse(verses);
+                        $('#image-verse').val(singleVerse);
+                        $("#scripture-docx").html("All verses in DOCX: <ul><li>" + verses.join("</li><li>") + "</li></uL>");
+                    }
+                });
             });
 
             $('#series').on('click', clickDatalist)
