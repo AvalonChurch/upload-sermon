@@ -112,7 +112,7 @@ if(isset($_POST['submit'])) {
         function getScriptureRefs(file) {
             let objectUrl = URL.createObjectURL(file);
             let verses = [];
-            loadFile(objectUrl, function(err,content,verses){
+            loadFile(objectUrl, function(err,content){
                 let zip = new JSZip(content);
                 let doc= new window.docxtemplater().loadZip(zip);
                 let text = doc.getFullText();
@@ -128,8 +128,8 @@ if(isset($_POST['submit'])) {
                     if (m) {
                         let verse = m[1].trim();
                         verse = verse.replace(/  +/g, " ");
-                        console.log(verse);
                         if (! verses.includes(verse)) {
+                            console.log(verse);
                             verses.push(verse);
                         }
                     }
