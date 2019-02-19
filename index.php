@@ -114,12 +114,13 @@ if(isset($_POST['submit'])) {
             let verses = [];
             loadFile(objectUrl, function(err,content){
                 let zip = new JSZip(content);
-                let doc=new window.docxtemplater().loadZip(zip);
+                let doc= new window.docxtemplater().loadZip(zip);
                 let text = doc.getFullText();
-                let title = text.split(/201/)[0];
-                if(!$('#title-chinese').length)
+                let title = text.split(/201/)[0]; // splits on the date which starts with 201
+                if(title.length && !$('#title-chinese').length && file.endsWith('docx') && title.length < 200) {
                     $('#title-chinese').val(title);
-                console.log(title);
+                    console.log(title);
+                }
                 let re = /【([^】]+)】/g;
                 let m;
                 do {
@@ -254,6 +255,7 @@ if(isset($_POST['submit'])) {
                 // Extract scripture verses
                 let file = e.currentTarget.files[0];
                 let verses = getScriptureRefs(file);
+                console.log(verses);
                 if (verses.length > 0) {
                     let mainVerse = verses[0];
                     if(! $('#scripture').val().length)
@@ -287,6 +289,7 @@ if(isset($_POST['submit'])) {
                 // Extract scripture verses
                 let file = e.currentTarget.files[0];
                 let verses = getScriptureRefs(file);
+                console.log(verse);
                 if (verses.length > 0) {
                     let mainVerse = verses[0];
                     $('#scripture').val(mainVerse);
