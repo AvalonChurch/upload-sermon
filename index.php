@@ -259,7 +259,7 @@ if(isset($_POST['submit'])) {
                     if(! $('#scripture').val().length)
                         $('#scripture').val(mainVerse);
                     let singleVerse = getSingleVerse(verses);
-                    if(! $('#image-verse').val().elgnth)
+                    if(! $('#image-verse').val().length)
                         $('#image-verse').val(singleVerse);
                     $("#scripture-pptx").html("All verses in PPTX: <ul><li>" + verses.join("</li><li>") + "</li></uL>");
                 }
