@@ -25,7 +25,6 @@ if(isset($_POST['submit'])) {
     $catid = intval($_POST['catid']);
     $series = $_POST['series'];
     $scripture = $_POST['scripture'];
-    $scriptures = $_POST['docx_scriptures'];
     $image_verse = $_POST['image_verse'];
 
     $timestamp = date('Y-m-d H-i-s').' - '.time();
@@ -327,7 +326,7 @@ if(isset($_POST['submit'])) {
 
     <pre>
 <?php
-    makeSermon($date, $message_mp3, $message_pptx, $message_docx, $message_image, $title_english, $title_chinese, $catid, $series, $speaker, $scripture, $scriptures, $image_verse);
+    makeSermon($date, $message_mp3, $message_pptx, $message_docx, $message_image, $title_english, $title_chinese, $catid, $series, $speaker, $scripture, $image_verse);
 ?>
     </pre>
 <?php endif;?>
