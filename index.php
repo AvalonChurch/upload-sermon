@@ -113,8 +113,6 @@ if(isset($_POST['submit'])) {
             let objectUrl = URL.createObjectURL(file);
             let verses = [];
             loadFile(objectUrl, function(err,content){
-                global verses;
-
                 let zip = new JSZip(content);
                 let doc= new window.docxtemplater().loadZip(zip);
                 let text = doc.getFullText();
@@ -130,6 +128,7 @@ if(isset($_POST['submit'])) {
                     if (m) {
                         let verse = m[1].trim();
                         verse = verse.replace(/  +/g, " ");
+                        console.log(verse);
                         if (! verses.includes(verse)) {
                             verses.push(verse);
                         }
