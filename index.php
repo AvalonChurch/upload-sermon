@@ -121,6 +121,7 @@ if(isset($_POST['submit'])) {
                     $('#title-chinese').val(title);
                     console.log(title);
                 }
+                console.log(text);
                 let re = /【([^】]+)】/g;
                 let m;
                 do {
