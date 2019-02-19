@@ -289,7 +289,7 @@ if(isset($_POST['submit'])) {
                 // Extract scripture verses
                 let file = e.currentTarget.files[0];
                 let verses = getScriptureRefs(file);
-                console.log(verse);
+                console.log(verses);
                 if (verses.length > 0) {
                     let mainVerse = verses[0];
                     $('#scripture').val(mainVerse);
