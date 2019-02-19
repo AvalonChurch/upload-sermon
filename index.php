@@ -109,9 +109,10 @@ if(isset($_POST['submit'])) {
             JSZipUtils.getBinaryContent(url, callback);
         };
 
+        var verses = [];
         function getScriptureRefs(file) {
             let objectUrl = URL.createObjectURL(file);
-            let verses = [];
+            verses = [];
             loadFile(objectUrl, function(err,content){
                 let zip = new JSZip(content);
                 let doc= new window.docxtemplater().loadZip(zip);
