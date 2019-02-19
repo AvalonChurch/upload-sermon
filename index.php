@@ -4,7 +4,7 @@ require_once('sermons.php');
 $upload_dir = dirname(__FILE__) . "/uploaded";
 
 $message_mp3 = null;
-$message_ppt = null;
+$message_pptx = null;
 $message_docx = null;
 $message_image = null;
 $title_english = '';
@@ -45,13 +45,13 @@ if(isset($_POST['submit'])) {
             }
         }
     }
-    $message_ppt = null;
-    if (isset($_FILES['message_ppt']) && $_FILES['message_ppt']['tmp_name']) {
-        $tmpFilePath = $_FILES['message_ppt']['tmp_name'];
+    $message_pptx = null;
+    if (isset($_FILES['message_pptx']) && $_FILES['message_pptx']['tmp_name']) {
+        $tmpFilePath = $_FILES['message_pptx']['tmp_name'];
         if ($tmpFilePath != "") {
-            $filePath = $myDir . "/" . $_FILES['message_ppt']['name'];
+            $filePath = $myDir . "/" . $_FILES['message_pptx']['name'];
             if (move_uploaded_file($tmpFilePath, $filePath)) {
-                $message_ppt = $filePath;
+                $message_pptx = $filePath;
             }
         }
     }
@@ -104,27 +104,27 @@ if(isset($_POST['submit'])) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip-utils/0.0.2/jszip-utils.js"></script>
 
     <script type="text/javascript">
-        var loadFile=function(url,callback){
-            JSZipUtils.getBinaryContent(url,callback);
+        let loadFile=function(url,callback){
+            JSZipUtils.getBinaryContent(url, callback);
         };
 
         function getScriptureRefs(file) {
-            var objectUrl = URL.createObjectURL(file);
-            var verses = [];
+            let objectUrl = URL.createObjectURL(file);
+            let verses = [];
             loadFile(objectUrl, function(err,content){
-                var zip = new JSZip(content);
-                var doc=new window.docxtemplater().loadZip(zip);
-                var text = doc.getFullText();
-                var title = text.split(/201/)[0];
+                let zip = new JSZip(content);
+                let doc=new window.docxtemplater().loadZip(zip);
+                let text = doc.getFullText();
+                let title = text.split(/201/)[0];
                 if(!$('#title-chinese').length)
                     $('#title-chinese').val(title);
                 console.log(title);
-                var re = /【([^】]+)】/g;
-                var m;
+                let re = /【([^】]+)】/g;
+                let m;
                 do {
                     m = re.exec(text);
                     if (m) {
-                        var verse = m[1].trim();
+                        let verse = m[1].trim();
                         verse = verse.replace(/  +/g, " ");
                         if (! verses.includes(verse)) {
                             verses.push(verse);
@@ -136,7 +136,7 @@ if(isset($_POST['submit'])) {
         }
 
         function getSingleVerse(verses) {
-            var singleVerse;
+            let singleVerse;
             if (verses.length > 0) {
                 singleVerse = verses[0].replace(/[^\w :-]+/g, " ");
                 singleVerse = singleVerse.split(/[,;-]/)[0];
@@ -145,102 +145,65 @@ if(isset($_POST['submit'])) {
             return singleVerse;
         }
 
+        function getDateFromFile(path) {
+            let filename = path.split('\\').pop();
+            let parts = filename.split(/[_.]/);
+            let date = null;
+            if(parts.length > 1) {
+                date = parts[0];
+            }
+            if (date.length === 6) {
+                date = "20" + date.substring(0, 2) + "-" + date.substr(2, 2) + "-" + date.substr(4, 2);
+
+            }
+            let isDate = Date.parse(date);
+            if (isDate) {
+                return moment(date).format('YYYY-MM-DD');
+            }
+        }
+
+        function getTitleFromFile(path) {
+            let filename = path.split('\\').pop();
+            let parts = filename.split(/[_.]/);
+            if (parts.length > 2)
+                return parts[1];
+        }
+
+        function pad(num, size) {
+            let s = num+"";
+            while (s.length < size) s = "0" + s;
+            return s;
+        }
+
+        function putValueBackFromPlaceholder(id) {
+            let $this = $('#'+id);
+            if ($this.val() === '') {
+                $this.val($this.attr('placeholder'));
+                $this.attr('placeholder','');
+            }
+        }
+        function clickDatalist(e) {
+            let $this = $(this);
+            let inpLeft = $this.offset().left;
+            let inpWidth = $this.width();
+            let clickedLeft = e.clientX;
+            let clickedInInpLeft = clickedLeft - inpLeft;
+            let arrowBtnWidth = 12;
+            if ((inpWidth - clickedInInpLeft) < arrowBtnWidth ) {
+                if ($this.val() != "") {
+                    $this.attr('placeholder', $this.val());
+                    $this.val('');
+                }
+            }
+            else {
+                putValueBackFromPlaceholder($this.prop('id'));
+            }
+        }
+
         $(document).ready(function(){
-            $('input#message-mp3').change(function(){
-                var filename = $(this).val().split('\\').pop();
-                var parts = filename.split(/[_.]/);
-                var date = null;
-                if(parts.length > 1) {
-                    date = parts[0];
-                }
-                if (date.length === 6) {
-                    date = "20" + date.substring(0, 2) + "-" + date.substr(2, 2) + "-" + date.substr(4, 2);
+            let NO_DATE = "No date found in filename. Please specify a date in the date field below.";
+            let audio = new Audio();
 
-                }
-                var isDate = Date.parse(date);
-                if (isDate) {
-                    var dateStr = moment(date).format('YYYY-MM-DD');
-                    $('#date').val(dateStr);
-                }
-            });
-
-            $('input#message-ppt').change(function(){
-                var filename = $(this).val().split('\\').pop();
-                var parts = filename.split(/[_.]/);
-                var date = parts[0];
-                var title = null;
-                if (parts.length > 2)
-                    title = parts[1];
-                if(date.length !== 10 && parts.length > 3) {
-                    date = parts[0] + " " + parts[1] + ", " + parts[2];
-                    if (parts.length > 4)
-                        title = parts[3];
-                }
-                var isDate = Date.parse(date);
-                if (isDate) {
-                    var dateStr = moment(date).format('YYYY-MM-DD');
-                    var dateObj = new Date(dateStr);
-                    $('#date').val(dateStr);
-                    $('#title-english').val(title);
-                }
-            });
-
-            $('input#message-notes').change(function(){
-                var filename = $(this).val().split('\\').pop();
-                var parts = filename.split(/[_.]/);
-                var date = parts[0];
-                var title = null;
-                if (parts.length > 2)
-                    title = parts[1];
-                if(date.length !== 10 && parts.length > 3) {
-                    date = parts[0] + " " + parts[1] + ", " + parts[2];
-                    if (parts.length > 4)
-                       title = parts[3];
-                }
-                var isDate = Date.parse(date);
-                if (isDate) {
-                    var dateStr = moment(date).format('YYYY-MM-DD');
-                    $('#date').val(dateStr);
-                    $('#title-chinese').val(title);
-                }
-            });
-
-            function putValueBackFromPlaceholder(id) {
-                var $this = $('#'+id);
-                if ($this.val() === '') {
-                    $this.val($this.attr('placeholder'));
-                    $this.attr('placeholder','');
-                }
-            }
-            function clickDatalist(e) {
-                var $this = $(this);
-                var inpLeft = $this.offset().left;
-                var inpWidth = $this.width();
-                var clickedLeft = e.clientX;
-                var clickedInInpLeft = clickedLeft - inpLeft;
-                var arrowBtnWidth = 12;
-                if ((inpWidth - clickedInInpLeft) < arrowBtnWidth ) {
-                    if ($this.val() != "") {
-                        $this.attr('placeholder', $this.val());
-                        $this.val('');
-                    }
-                }
-                else {
-                    putValueBackFromPlaceholder($this.prop('id'));
-                }
-            }
-
-            $('#series').on('click', clickDatalist)
-                .on('mouseleave', putValueBackFromPlaceholder, 'series');
-            $('#speaker').on('click', clickDatalist)
-                .on('mouseleave', putValueBackFromPlaceholder, 'speaker');
-
-            var audio = new Audio();
-            function pad(num, size) {
-                var s = num+"";
-                while (s.length < size) s = "0" + s;
-                return s;
-            }
             audio.addEventListener("timeupdate", function() {
                 console.log('ct: '+audio.currentTime);
             });
@@ -248,37 +211,94 @@ if(isset($_POST['submit'])) {
                 console.log('d: '+audio.duration);
                 $("#duration").html(pad(Math.floor(audio.duration/3600),2) + ':' + pad(Math.floor((audio.duration%3600)/60),2) + ':' + pad(Math.round(audio.duration%60),2));
             });
-            $('input#message-mp3').change(function(e) {
-                var file = e.currentTarget.files[0];
-                var objectUrl = URL.createObjectURL(file);
+
+            $('#message-mp3').change(function(e){
+                let date = getDateFromFile($(this).val());
+                if (date) {
+                    $('#date').val(date);
+                    $('#mp3-date').html(date);
+                    if(($('#pptx-date').html().length && $('#pptx-date').html() != date) ||
+                        ($('#docx-date').html().length && $('#docx-date').html() != date)) {
+                        alert("FILE DATES DO NOT MATCH!!!!");
+                    }
+                } else {
+                    $('#mp3-date').html(NO_DATE);
+                }
+
+                // Get audio length
+                let file = e.currentTarget.files[0];
+                let objectUrl = URL.createObjectURL(file);
                 audio.src = objectUrl;
             });
 
-            $('input#message-docx').change(function(e) {
-                var file = e.currentTarget.files[0];
-                var verses = getScriptureRefs(file);
-                if (verses.length > 0) {
-                    var mainVerse = verses[0];
-                    $('#scripture').val(mainVerse);
-                    var singleVerse = getSingleVerse(verses);
-                    $('#image-verse').val(singleVerse);
-                    $("#scripture-docx").html("All verses in DOCX: <ul><li>" + verses.join("</li><li>") + "</li></uL>");
+            $('#message-pptx').change(function(e){
+                let date = getDateFromFile($(this).val());
+                let title = getTitleFromFile($(this).val());
+                if (date) {
+                    $('#date').val(date);
+                    $('#pptx-date').html(date);
+                    if(($('#mp3-date').html().length && $('#mp3-date').html() != date) ||
+                        ($('#docx-date').html().length && $('#docx-date').html() != date)) {
+                        alert("FILE DATES DO NOT MATCH!!!!");
+                    }
+                } else {
+                    $('#pptx-date').html(NO_DATE);
                 }
-            });
+                if(title) {
+                    $('#title-english').val(title);
+                } else {
+                    alert("English Sermon Name Not Found in File Name! Right file? Please enter it in the English Title field.")
+                }
 
-            $('input#message-pptx').change(function(e) {
-                var file = e.currentTarget.files[0];
-                var verses = getScriptureRefs(file);
+                // Extract scripture verses
+                let file = e.currentTarget.files[0];
+                let verses = getScriptureRefs(file);
                 if (verses.length > 0) {
-                    var mainVerse = verses[0];
+                    let mainVerse = verses[0];
                     if(! $('#scripture').val().length)
                         $('#scripture').val(mainVerse);
-                        var singleVerse = getSingleVerse(verses);
+                    let singleVerse = getSingleVerse(verses);
                     if(! $('#image-verse').val().elgnth)
                         $('#image-verse').val(singleVerse);
                     $("#scripture-pptx").html("All verses in PPTX: <ul><li>" + verses.join("</li><li>") + "</li></uL>");
                 }
             });
+
+            $('#message-docx').change(function(){
+                let date = getDateFromFile($(this).val());
+                let title = getTitleFromFile($(this).val());
+                if (date) {
+                    $('#date').val(date);
+                    $('#docx-date').html(date);
+                    if(($('#mp3-date').html().length && $('#mp3-date').html() != date) ||
+                        ($('#pptx-date').html().length && $('#pptx-date').html() != date)) {
+                        alert("FILE DATES DO NOT MATCH!!!!");
+                    }
+                } else {
+                    $('#docx-date').html(NO_DATE);
+                }
+                if(title) {
+                    $('#title-chinese').val(title);
+                } else {
+                    alert("Chinese Sermon Name Not Found in File Name! Right file? Please enter it in the Chinese Title field.")
+                }
+
+                // Extract scripture verses
+                let file = e.currentTarget.files[0];
+                let verses = getScriptureRefs(file);
+                if (verses.length > 0) {
+                    let mainVerse = verses[0];
+                    $('#scripture').val(mainVerse);
+                    let singleVerse = getSingleVerse(verses);
+                    $('#image-verse').val(singleVerse);
+                    $("#scripture-docx").html("All verses in DOCX: <ul><li>" + verses.join("</li><li>") + "</li></uL>");
+                }
+            });
+
+            $('#series').on('click', clickDatalist)
+                .on('mouseleave', putValueBackFromPlaceholder, 'series');
+            $('#speaker').on('click', clickDatalist)
+                .on('mouseleave', putValueBackFromPlaceholder, 'speaker');
         });
 
         });
@@ -293,7 +313,7 @@ if(isset($_POST['submit'])) {
         echo "<b>Uploaded:</b>";
         echo "<ul>";
         echo "<li>MP3: ".($message_mp3?$message_mp3:"none")."</li>";
-        echo "<li>PPTX: ".($message_ppt?$message_ppt:"none")."</li>";
+        echo "<li>PPTX: ".($message_pptx?$message_pptx:"none")."</li>";
         echo "<li>DOCX: ".($message_docx?$message_docx:"none")."</li>";
         echo "</ul>";
     }
@@ -301,7 +321,7 @@ if(isset($_POST['submit'])) {
 
     <pre>
 <?php
-    makeSermon($message_mp3, $message_ppt, $message_docx, $message_image, $title_english, $title_chinese, $date, $catid, $series, $speaker, $scripture, $scriptures, $image_verse);
+    makeSermon($message_mp3, $message_pptx, $message_docx, $message_image, $title_english, $title_chinese, $date, $catid, $series, $speaker, $scripture, $scriptures, $image_verse);
 ?>
     </pre>
 <?php endif;?>
@@ -320,16 +340,19 @@ identifier to know if you are adding a new one or updating an existing one.</li>
         <label for="message-mp3">Message MP3</label>
         <input id="message-mp3" name="message_mp3" type="file" accept=".mp3"/>
         <div>Duration: <span id="duration">--:--:--</span></div>
+        <div id="mp3-date" style="font-weight:bold;"></div>
     </div>
 
     <div>
-        <label for="message-ppt">Message PPTX</label>
-        <input id="message-ppt" name="message_ppt" type="file" accept=".pptx"/>
+        <label for="message-pptx">Message PPTX</label>
+        <input id="message-pptx" name="message_pptx" type="file" accept=".pptx"/>
+        <div id="pptx-date" style="font-weight:bold;"></div>
     </div>
 
     <div>
         <label for="message-docx">Message DOCX</label>
         <input id="message-docx" name="message_docx" type="file" accept=".doc,.docx"/>
+        <div id="docx-date" style="font-weight:bold;"></div>
     </div>
 
     <p/>
