@@ -112,7 +112,7 @@ if(isset($_POST['submit'])) {
         function getScriptureRefs(file) {
             let objectUrl = URL.createObjectURL(file);
             let verses = [];
-            loadFile(objectUrl, function(err,content){
+            loadFile(objectUrl, function(err,content,verses){
                 let zip = new JSZip(content);
                 let doc= new window.docxtemplater().loadZip(zip);
                 let text = doc.getFullText();
