@@ -334,15 +334,15 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     if($message_docx && file_exists($message_docx)) {
         try {
             $docxText = RD_Text_Extraction::convert_to_text($message_docx);
-            preg_match_all('/【([^】]+\d+[^】]*)】/', $docxText, $matches, PREG_PATTERN_ORDER);
+            preg_match_all('/【([^】]+\d+[^】]*)】/', $docxText, $matches);
             $verses = array_unique($matches[0]);
             echo "TEXT::\n";
             echo $docxText;
-            die();
             echo "MATCHES:\n";
             print_r($matches);
             echo "VERSES:\n";
             print_r($verses);
+            die();
             $docx_scriptures = implode("\n", $verses);
             echo "DOCX Scripture: $docx_scriptures\n";
         } catch(Exception $e) {
