@@ -334,7 +334,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     if($message_docx && file_exists($message_docx)) {
         try {
             $docxText = RD_Text_Extraction::convert_to_text($message_docx);
-            preg_match_all('/【([^】]+)】/', $docxText, $matches, PREG_PATTERN_ORDER);
+            preg_match_all('/【[^】]+】/', $docxText, $matches, PREG_PATTERN_ORDER);
             $verses = array_unique($matches[0]);
             echo "TEXT::\n";
             echo $docxText;
