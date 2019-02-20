@@ -335,7 +335,12 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
         try {
             $docxText = RD_Text_Extraction::convert_to_text($message_docx);
             preg_match_all('/【([^】]+\d+[^】]*)】/', $docxText, $matches, PREG_PATTERN_ORDER);
-            $docx_scriptures = implode("\n", $matches[0]);
+            $verses = array_unique($matches[0]);
+            echo "MATCHES:\n";
+            print_r($matches);
+            echo "VERSES:\n";
+            print_r($verses);
+            $docx_scriptures = implode("\n", $verses);
             echo "DOCX Scripture: $docx_scriptures\n";
         } catch(Exception $e) {
             echo $e->getMessage();
@@ -346,7 +351,12 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
         try {
             $pptxText = RD_Text_Extraction::convert_to_text($message_pptx);
             preg_match_all('/【([^】]+\d+[^】]*)】/', $pptxText, $matches, PREG_PATTERN_ORDER);
-            $pptx_scriptures = implode("\n", $matches[0]);
+            $verses = array_unique($matches[0]);
+            $pptx_scriptures = implode("\n", $verses);
+            echo "MATCHES:\n";
+            print_r($matches);
+            echo "VERSES:\n";
+            print_r($verses);
             echo "PPTX Scriptures: $pptx_scriptures\n";
             if(!$message_docx) {
                 $docx_scriptures = $pptx_scriptures;
