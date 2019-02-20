@@ -336,6 +336,9 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
             $docxText = RD_Text_Extraction::convert_to_text($message_docx);
             preg_match_all('/【([^】]+\d+[^】]*)】/', $docxText, $matches, PREG_PATTERN_ORDER);
             $verses = array_unique($matches[0]);
+            echo "TEXT::\n";
+            echo $docxText;
+            die();
             echo "MATCHES:\n";
             print_r($matches);
             echo "VERSES:\n";
