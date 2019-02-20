@@ -102,6 +102,45 @@ function cleanUpScripture($scripture) {
     return $scripture;
 }
 
+function getUniqueVerses($text) {
+    preg_match_all('/【(.+?\d.*?)】/', $text, $matches, PREG_PATTERN_ORDER);
+    $verses = array_values(array_unique($matches[1]));
+    $verses = array_map(function($value) {
+        return cleanUpScripture($value);
+    }, $verses);
+    print("VERSES:\n");
+    print_r($verses);
+    $unique_verses = array();
+    $i = 0;
+    while($i < count($verses)) {
+        preg_match('/^(.*) (\d+):(\d+)$/', cleanUpScripture($verses[$i]), $ms);
+        if($ms) {
+            $mf = null;
+            $m = $ms;
+            do {
+                $i++;
+                $m1 = null;
+                if($i < count($verses)) {
+                    preg_match('/^(.*) (\d+):(\d+)$/', cleanUpScripture($verses[$i]), $m1);
+                    if ($m1 && $m1[1] == $m[1] && (($m1[2] == $m[2] && $m1[3] == $m[3] + 1) || ($m1[2] == $m[2] + 1 && $m1[3] == 1))) {
+                        $mf = $m1;
+                        $m = $m1;
+                    } else {
+                        $m1 = null;
+                    }
+                }
+            } while($m1);
+            $unique_verses[] = $ms[1]." ".$ms[2].":".$ms[3].($mf?'-'.($mf[2]!=$ms[2]?$mf[2].':'.$mf[3]:($mf[3]!=$ms[3]?$mf[3]:'')):'');
+        } else {
+            $unique_verses[] = $verses[$i];
+            $i++;
+        }
+    }
+    print("UNIQUE VERSES:\n");
+    print_r($unique_verses);
+    return $unique_verses;
+}
+
 function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $message_docx = null, $message_image = null, $title_english = null, $title_chinese = null, $catid = null, $series = null, $speaker = null, $main_scripture = null, $image_verse = null)
 {
     global $conn,
@@ -141,8 +180,8 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     $old_message_pptx = null;
     $old_message_docx = null;
     $old_message_image = null;
-    $docx_scriptures = "";
-    $pptx_scriptures = "";
+    $docx_scriptures = null;
+    $pptx_scriptures = null;
 
     if ($existing_row) {
         echo "This date (".$date.") already has a sermon that exists, so updating it...\n";
@@ -334,9 +373,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     if($message_docx && file_exists($message_docx)) {
         try {
             $docxText = RD_Text_Extraction::convert_to_text($message_docx);
-            preg_match_all('/【(.+?\d.*?)】/', $docxText, $matches, PREG_PATTERN_ORDER);
-            $verses = array_unique($matches[0]);
-            $docx_scriptures = implode("\n", $verses);
+            $docx_scriptures = getUniqueVerses($docxText);
         } catch(Exception $e) {
             echo $e->getMessage();
         }
@@ -345,30 +382,23 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     if($message_pptx && file_exists($message_pptx)) {
         try {
             $pptxText = RD_Text_Extraction::convert_to_text($message_pptx);
-            preg_match_all('/【(.+?\d.*?)】/', $pptxText, $matches, PREG_PATTERN_ORDER);
-            $verses = array_unique($matches[0]);
-            $pptx_scriptures = implode("\n", $verses);
+            $pptx_scriptures = getUniqueVerses($pptxText);
             if(!$message_docx) {
                 $docx_scriptures = $pptx_scriptures;
-                $pptx_scriptures = "";
+                $pptx_scriptures = null;
             }
         } catch(Exception $e) {
             echo $e->getMessage();
         }
     }
 
-    $docx_scriptures = cleanUpScripture($docx_scriptures);
-    $pptx_scriptures = cleanUpScripture($pptx_scriptures);
-
     if($main_scripture && ! $docx_scriptures) {
-        $docx_scriptures = $main_scripture;
-        if (strpos($docx_scriptures, "【") === false)
-            $docx_scriptures = "【" . $docx_scriptures . "】";
+        $docx_scriptures = array($main_scripture);
     }
 
     $comment = "";
     if($docx_scriptures)
-        $comment = "經文 Scripture:\n * ".preg_replace('/ *\n */', "\n * ", $docx_scriptures)."\n\n";
+        $comment = "經文 Scripture:\n * ".implode("\n * ", $docx_scriptures)."\n\n";
     if($message_docx && file_exists($message_docx)) {
         try {
             $comment .= "筆記 Notes:\n\n";
@@ -407,9 +437,9 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
 
     if (! $main_scripture) {
         if ($pptx_scriptures)
-            $main_scripture = explode("\n", $pptx_scriptures)[0];
+            $main_scripture = $pptx_scriptures[0];
         else if ($docx_scriptures)
-            $main_scripture = explode("\n", $docx_scriptures)[0];
+            $main_scripture = $docx_scriptures[0];
     }
     $main_scripture = preg_replace('/【/', '', $main_scripture);
     $main_scripture = preg_replace('/】/', '', $main_scripture);
@@ -428,7 +458,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
 
     $body_lines = array();
     if(trim($docx_scriptures))
-        $body_lines[] = '<p>經文 Scripture:<ul><li>'.preg_replace('/ *\n */', '</li><li>', $docx_scriptures).'</li></ul></p>';
+        $body_lines[] = '<p>經文 Scripture:<ul><li>'.implode('</li><li>', $docx_scriptures).'</li></ul></p>';
     $add_file = '';
     $add_file_desc = '';
     if (file_exists($message_pptx)) {
@@ -460,7 +490,6 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
         $picture = $sermon_dir . '/' . basename($message_image);
     }
     $body = implode("<br/>\n", $body_lines);
-    echo "BODY: $body\n";
     $audio_file = '/' . $sermon_dir . '/' . basename($message_mp3);
     $audio_file_size = filesize($message_mp3);
 
