@@ -88,8 +88,10 @@ function cleanUpScripture($scripture) {
     $scripture = preg_replace('/-/', '-', $scripture);
     $scripture = preg_replace('/: +/', ':', $scripture);
     $scripture = preg_replace('/；/', '; ', $scripture);
-    $scripture = preg_replace('/([^A-Za-z0-9: ,;_【】\n-])([A-Za-z0-9])/', '$1 $2', $scripture);
-    $scripture = preg_replace_callback('/(【|^) *([^【\x00-\x7f]+) *(\d[\d:】-])/', function ($matches) {
+    $scripture = preg_replace('/【/', '', $scripture);
+    $scripture = preg_replace('/】/', '', $scripture);
+    $scripture = preg_replace('/([^A-Za-z0-9: ,;_\n-])([A-Za-z0-9])/', '$1 $2', $scripture);
+    $scripture = preg_replace_callback('/^ *([^\x00-\x7f]+) *(\d[\d:-])/', function ($matches) {
         global $chineseToEnglish;
         if ($matches && $chineseToEnglish[$matches[2]])
             return $matches[1] . $matches[2] . ' ' . $chineseToEnglish[$matches[2]] . ' ' . $matches[3];
@@ -441,8 +443,6 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
         else if ($docx_scriptures)
             $main_scripture = $docx_scriptures[0];
     }
-    $main_scripture = preg_replace('/【/', '', $main_scripture);
-    $main_scripture = preg_replace('/】/', '', $main_scripture);
     $main_scripture = cleanUpScripture($main_scripture);
     echo "MAIN SCRIPTURE: $main_scripture\n";
 
@@ -457,7 +457,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     }
 
     $body_lines = array();
-    if(trim($docx_scriptures))
+    if($docx_scriptures)
         $body_lines[] = '<p>經文 Scripture:<ul><li>'.implode('</li><li>', $docx_scriptures).'</li></ul></p>';
     $add_file = '';
     $add_file_desc = '';
