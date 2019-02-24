@@ -24,6 +24,7 @@ if(isset($_POST['submit'])) {
     $date = date('Y-m-d', strtotime($_POST['date']));
     $catid = intval($_POST['catid']);
     $series = $_POST['series'];
+    $speaker = $_POST['speaker'];
     $scripture = $_POST['scripture'];
     $image_verse = $_POST['image_verse'];
 

@@ -61,12 +61,10 @@ function setSermonDir($catid) {
     if (!file_exists('../' . $sermon_dir)) {
         mkdir('../' . $sermon_dir, 0777, true);
     }
-    echo "SERMON DIR: $sermon_dir\n\n";
     $ret = chdir('../' . $sermon_dir);
 }
 
 function getFileTitle($title) {
-    echo "Start FileTitle: $title\n";
     $title = explode(':', $title)[0];
     $title = explode(' - ', $title)[0];
     if(strlen($title) > 60 ) {
@@ -77,7 +75,6 @@ function getFileTitle($title) {
     $title = trim(preg_replace('/[^A-Za-z0-9_-]/', '-', $title));
     $title = preg_replace('/-+/', '-', $title);
     $title = preg_replace('/-+$/', '', $title);
-    echo "End FileTitle: $title\n";
     return $title;
 }
 
@@ -110,8 +107,6 @@ function getUniqueVerses($text) {
     $verses = array_map(function($value) {
         return cleanUpScripture($value);
     }, $verses);
-    print("VERSES:\n");
-    print_r($verses);
     $unique_verses = array();
     $i = 0;
     while($i < count($verses)) {
@@ -138,8 +133,6 @@ function getUniqueVerses($text) {
             $i++;
         }
     }
-    print("UNIQUE VERSES:\n");
-    print_r($unique_verses);
     return $unique_verses;
 }
 
@@ -222,10 +215,10 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
         if (file_exists($file . '.mp3')) {
             $old_message_mp3 = 'bak/' . $file . '_OLD-' . $time . '.mp3';
             rename($file . '.mp3', $old_message_mp3);
-            echo "rename($file . '.mp3', $old_message_mp3);";
+//            echo "rename($file . '.mp3', $old_message_mp3);";
             if (!$message_mp3)
                 $message_mp3 = $old_message_mp3;
-            echo "message_mp3 = $message_mp3\n";
+//            echo "message_mp3 = $message_mp3\n";
         }
 
         if (file_exists($file . '.pptx')) {
@@ -251,7 +244,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
             $message_mp3 = ($old_message_mp3 ? $old_message_mp3 : '../../no_recording.mp3');
 
         if ($message_mp3 && file_exists($message_mp3)) {
-            echo "copy($message_mp3, $filename . '.mp3')\n";
+//            echo "copy($message_mp3, $filename . '.mp3')\n";
             copy($message_mp3, $filename . '.mp3');
             $message_mp3 = $filename . '.mp3';
         }
@@ -260,7 +253,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
             $message_pptx = ($old_message_pptx ? $old_message_pptx : null);
         }
         if ($message_pptx && file_exists($message_pptx)) {
-            echo "copy($message_pptx, $filename . '.pptx')\n";
+//            echo "copy($message_pptx, $filename . '.pptx')\n";
             copy($message_pptx, $filename . '.pptx');
             $message_pptx = $filename . '.pptx';
         }
@@ -269,7 +262,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
             $message_docx = $old_message_docx;
         }
         if ($message_docx && file_exists($message_docx)) {
-            echo "copy($message_docx, $filename . '.docx')\n";
+//            echo "copy($message_docx, $filename . '.docx')\n";
             copy($message_docx, $filename . '.docx');
             $message_docx = $filename . '.docx';
         }
@@ -278,7 +271,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
             $message_image = ($old_message_image ? $old_message_image : null);
         }
         if ($message_image && file_exists($message_image)) {
-            echo "copy($message_image, $filename . '.image')\n";
+//            echo "copy($message_image, $filename . '.image')\n";
             copy($message_image, $filename . '.jpg');
             $message_image = $filename . '.jpg';
         }
@@ -304,8 +297,6 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
         if(! $catid)
             $catid = $existing_row['catid'];
     } else {
-        echo $filename . ".mp3 is new!\n\n";
-
         if(!$speaker){
             $speaker = "Barnabas Feng"; // default
         }
@@ -325,10 +316,11 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
             echo "A Chinese Title must be provided for new sermons";
             return;
         }
+
+        $filename = date('Y-m-d', strtotime($date)) . '_' . getFileTitle($title_english) . '_BCCC';
+        echo $filename . ".mp3 is new!\n\n";
+
     }
-
-    $filename = date('Y-m-d', strtotime($date)) . '_' . getFileTitle($title_english) . '_BCCC';
-
     if (!$message_mp3 || !file_exists($message_mp3)) {
         $message_mp3 = ($old_message_mp3 ? $old_message_mp3 : '../../upload-sermon/no_recording.mp3');
     }
@@ -404,7 +396,6 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     if($message_docx && file_exists($message_docx)) {
         try {
             $comment .= "筆記 Notes:\n\n";
-            echo "MP3 COMMENT Notes: $comment\n\n";
             $comment .= RD_Text_Extraction::convert_to_text($message_docx);
         } catch(Exception $e) {
             die($e->getMessage());
@@ -427,7 +418,6 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     file_put_contents('bak/' . $filename . "-tags.txt", json_encode($tag_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     $tagwriter->tag_data = $tag_data;
 
-    echo $tagwriter->filename."\n\n\n";
     if ($tagwriter->WriteTags()) {
         echo "Successfully wrote tags.\n";
         if (!empty($tagwriter->warnings)) {
@@ -444,7 +434,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
             $main_scripture = $docx_scriptures[0];
     }
     $main_scripture = cleanUpScripture($main_scripture);
-    echo "MAIN SCRIPTURE: $main_scripture\n";
+    echo "Main scripture verse: $main_scripture\n";
 
     $series_id = makeSeries($series, $catid);
     $speaker_id = makeSpeaker($speaker, $catid);
@@ -496,7 +486,6 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
     $info = $getID3->analyze($message_mp3);
     $sermon_time = format_duration($info['playtime_string']);
     $title = $title_english . ($title_chinese?' ' . $title_chinese:'');
-    echo("FINAL TITLE: $title_english |||| $title_chinese ===> $title\n");
     $alias = strtolower($filename);
     $creation_date = date("Y-m-d H:i:s");
 
@@ -691,12 +680,6 @@ function makeScriptureRef($sermon_id, $scripture)
             }
         }
     }
-    print("ORDER:");
-    var_dump($order);
-    print("REFS:");
-    var_dump($refs);
-    print("BAD:");
-    var_dump($bad_refs);
     foreach($order as $script) {
         insertIntoTable($prefix . 'sermon_scriptures', $refs[$script]);
     }
@@ -769,7 +752,6 @@ function getScriptureRef($str)
 	# Matthew 5:1-6:1
 	preg_match('/^([^:-]+) (\d+):(\d[\dab]*)-(\d+):(\d[\dab]*)$/', $str, $matches);
 	if ($matches) {
-		print_r($matches);
 		$ref['book'] = getBookNumber($matches[1]);
 		$ref['cap1'] = $matches[2];
 		$ref['vers1'] = preg_replace('/[^\d]/', '', $matches[3]);
@@ -802,20 +784,18 @@ function makeImage($basename, $scripture)
 {
 	global $books;
 	$scriptureRef = getScriptureRef($scripture);
-	print_r($scriptureRef);
 	if (!$scriptureRef || !$scriptureRef['book'] || !$books[$scriptureRef['book']] || !$scriptureRef['cap1'])
 		return null;
 	$scripturePath = str_replace(' ', '_', strtolower($books[$scriptureRef['book']][0])) . '/' . $scriptureRef['cap1'] . '-' . ($scriptureRef['vers1'] ? $scriptureRef['vers1'] : 1);
 	// LINUX:
-    $command = "wget -O $basename $(curl https://biblepic.com/$scripturePath.htm | lynx --dump -listonly -stdin | sed -r 's/^\s*[0-9]+\. file:\/\/localhost/https:\/\/biblepic.com/' | grep jpg)";
+    $url = "https://biblepic.com/$scripturePath.htm";
+    $command = "curl -o $basename $(curl $url | lynx --dump -listonly -stdin | sed -r 's/^\s*[0-9]+\. file:\/\/(localhost){0,1}/https:\/\/biblepic.com/' | grep jpg)";
     // MAC:
-//    $command = "curl -o $basename $(curl https://biblepic.com/$scripturePath.htm | /usr/local/bin/lynx --dump -listonly -stdin | /usr/local/bin/gsed -r 's/^\s*[0-9]+\. file:\/\//https:\/\/biblepic.com/' | grep jpg)";
+    // $command = "curl -o $basename $(curl $url | /usr/local/bin/lynx --dump -listonly -stdin | /usr/local/bin/gsed -r 's/^\s*[0-9]+\. file:\/\//https:\/\/biblepic.com/' | grep jpg)";
 	echo $command . "\n";
 	exec($command . " 2>&1", $output, $ret);
-	var_dump($output);
-    var_dump($ret);
 	if(!file_exists($basename)) {
-	    die('NO '.$basename);
+	    echo 'WARNING: NO IMAGE WAS DOWNLOADED FOR '.$basename." (<a href=\"$url\" target=\"_blank\">$url</a> is bad). Check the Image Verse and submit the form again (no need to re-upload media files)";
     }
 	return "$basename.jpg";
 }
@@ -832,7 +812,6 @@ function redo_all_sermons() {
     $sql = "SELECT * FROM " . $prefix . "sermon_sermons WHERE sermon_date >= '2018-01-01' ORDER BY sermon_date ASC";
     $result = $conn->query($sql);
     while($row = mysqli_fetch_assoc($result)){
-        print_r($row);
         $date = date('Y-m-d', strtotime($row['sermon_date']));
         echo $date."\n\n";
         makeSermon($date);
