@@ -4,3 +4,5 @@
 !*.mp3
 !getid3
 !*.jpg
+!*.ttf
+!*.sh
