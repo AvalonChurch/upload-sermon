@@ -53,7 +53,7 @@ function getChineseTitleFromDocx($docx_file) {
 
 function setSermonDir($catid) {
     global $sermon_dir;
-    if ($catid !== "21") {
+    if (intval($catid) !== 21) {
         $sermon_dir = 'sermonspeaker/sermons';
     } else {
         $sermon_dir = 'sermonspeaker/friday';
@@ -182,7 +182,7 @@ function makeSermon($date = null, $message_mp3 = null, $message_pptx = null, $me
         echo "This date (".$date.") already has a sermon that exists, so updating it...\n";
 
         if (!$catid) {
-            $catid = $existing_row['catid'];
+            $catid = intval($existing_row['catid']);
         }
         setSermonDir($catid);
 

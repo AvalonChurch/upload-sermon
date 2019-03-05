@@ -440,7 +440,7 @@ identifier to know if you are adding a new one or updating an existing one.</li>
     </div>
 
 
-    <p><input type="submit" name="submit" value="Submit"></p>
+    <p><button type="submit" name="submit" value="Submit"> <button type="reset" value="Reset"></p>
 </form>
 </body>
 </html>
