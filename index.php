@@ -85,14 +85,17 @@ if(isset($_POST['submit'])) {
     <title>BCCC Sermon Uploader/Updater</title>
     <style>
         body {
-            margin: 5px;
+            margin: 5px !important;
+        }
+        textarea {
+            display: block !important;
         }
         div {
-            padding-bottom: 5px;
+            padding-bottom: 5px !important;
         }
 
         label {
-            display: block;
+            display: block !important;
         }
 
         .required:after {
@@ -107,7 +110,6 @@ if(isset($_POST['submit'])) {
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/south-street/jquery-ui.css">
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.9.1/docxtemplater.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.6.1/jszip.js"></script>
