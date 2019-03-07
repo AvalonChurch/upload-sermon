@@ -387,9 +387,9 @@ identifier to know if you are adding a new one or updating an existing one.</li>
     <div>
         <label for="catid" class="required">Category</label>
         <select id="catid" name="catid" required>
-            <option value="19"<?php echo ($catid=="19"?" selected":"")?>>Sunday Sermon</option>
-            <option value="21"<?php echo ($catid=="21"?" selected":"")?>>Friday Lesson</option>
-            <option value="1"<?php echo ($catid=="1"?" selected":"")?>>Special Message</option>
+            <option value="19"<?php echo ($catid==19?" selected":"")?>>Sunday Sermon</option>
+            <option value="21"<?php echo ($catid==21?" selected":"")?>>Friday Lesson</option>
+            <option value="42"<?php echo ($catid==42?" selected":"")?>>Special Message</option>
         </select>
     </div>
 
@@ -440,7 +440,7 @@ identifier to know if you are adding a new one or updating an existing one.</li>
     </div>
 
 
-    <p><button type="submit" name="submit" value="Submit"> <button type="reset" value="Reset"></p>
+    <p><button type="submit" name="submit" value="Submit">Submit</button> <button type="reset" value="Reset">Reset</button></p>
 </form>
 </body>
 </html>
