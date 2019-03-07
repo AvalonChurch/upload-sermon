@@ -88,6 +88,9 @@ if(isset($_POST['submit'])) {
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <style>
+        body {
+            margin: 5px;
+        }
         div {
             padding-bottom: 5px;
         }
@@ -348,20 +351,20 @@ identifier to know if you are adding a new one or updating an existing one.</li>
 
     <div>
         <label for="message-mp3">Message MP3</label>
-        <input class="form-control" id="message-mp3" name="message_mp3" type="file" accept=".mp3"/>
+        <input id="message-mp3" name="message_mp3" type="file" accept=".mp3"/>
         <div>Duration: <span id="duration">--:--:--</span></div>
         <div id="mp3-date" style="font-weight:bold;"></div>
     </div>
 
     <div>
         <label for="message-pptx">Message PPTX</label>
-        <input class="form-control" id="message-pptx" name="message_pptx" type="file" accept=".pptx"/>
+        <input id="message-pptx" name="message_pptx" type="file" accept=".pptx"/>
         <div id="pptx-date" style="font-weight:bold;"></div>
     </div>
 
     <div>
         <label for="message-docx">Message DOCX</label>
-        <input class="form-control" id="message-docx" name="message_docx" type="file" accept=".doc,.docx"/>
+        <input id="message-docx" name="message_docx" type="file" accept=".doc,.docx"/>
         <div id="docx-date" style="font-weight:bold;"></div>
     </div>
 
@@ -371,15 +374,15 @@ identifier to know if you are adding a new one or updating an existing one.</li>
 
     <div>
         <label for="title-english" class="required">Message Title (English)</label>
-        <input class="form-control" type="text" id="title-english" name="title_english" size="50" value="<?php echo $title_english?>" required/>
+        <input type="text" id="title-english" name="title_english" size="50" value="<?php echo $title_english?>" required/>
         <br/>
         <label for="title-chinese" class="required">Message Title (Chinese)</label>
-        <input class="form-control" type="text" id="title-chinese" name="title_chinese" size="50" value="<?php echo $title_chinese?>" required/>
+        <input type="text" id="title-chinese" name="title_chinese" size="50" value="<?php echo $title_chinese?>" required/>
     </div>
 
     <div>
         <label for="date" class="required">Message date</label>
-        <input class="form-control" type="date" id="date" name="date" value="<?php echo $date?>" required/>
+        <input type="date" id="date" name="date" value="<?php echo $date?>" required/>
         <br/>
         Please make sure this is the date of the sermon/message!
     </div>
@@ -399,7 +402,7 @@ identifier to know if you are adding a new one or updating an existing one.</li>
 
     <div>
         <label for="series" class="required">Series</label>
-        <input class="form-control" id="series" name="series" type="text" list="series_list" value="<?php echo $series?>"  required/>
+        <input id="series" name="series" type="text" list="series_list" value="<?php echo $series?>"  required/>
         <datalist id="series_list">
             <option value="Matthew">Matthew</option>
             <option value="Exodus">Exodus</option>
@@ -411,7 +414,7 @@ identifier to know if you are adding a new one or updating an existing one.</li>
 
     <div>
         <label for="speaker" class="required">Speaker</label>
-        <input class="form-control" id="speaker" name="speaker" type="text" list="speaker_list" value="<?php echo $speaker?>" required/>
+        <input id="speaker" name="speaker" type="text" list="speaker_list" value="<?php echo $speaker?>" required/>
         <datalist id="speaker_list">
             <option>Barnabas Feng</option>
             <option>Abraham Chen</option>
@@ -432,17 +435,16 @@ identifier to know if you are adding a new one or updating an existing one.</li>
         <div id="scripture-pptx" style="padding-top:10px;width:50%;float:left"></div>
     </div>
 
-    <div style="border: black solid;clear:both;">
+    <div style="border: black solid;clear:both;padding: 5px;margin:5px;">
         <label for="image-verse">Image Verse</label>
-        <input class="form-control" type="text" id="image-verse" name="image_verse" value="<?php echo $image_verse?>" size="20">
+        <input type="text" id="image-verse" name="image_verse" value="<?php echo $image_verse?>" size="20">
         <br/>
         If this is empty, will attempt to get the first verse of the passage in the "Scripture" field.
         This is to be a verse that captures the message. If Message Image file field (below) is used, then this is ignored.
         <p>OR</p>
         <label for="message-image">Message Image (can make your own from <a href="https://biblepic.com/genesis/1-1.htm" target="_blank">here</a> or find using <a href="https://www.google.com/search?q=Genesis+1:1&newwindow=1&safe=strict&source=lnms&tbm=isch&sa=X&ved=0ahUKEwjx2-a75bHgAhVXJzQIHcd6Bl8Q_AUIDigB&biw=1164&bih=601" target="_blank">Google</a>)</label>
-        <input class="form-control" id="message-image" name="message_image" type="file" accept=".gif,.jpg,.jpeg,.png"/>
+        <input id="message-image" name="message_image" type="file" accept=".gif,.jpg,.jpeg,.png"/>
     </div>
-
 
     <p><button class="btn btn-primary" type="submit" name="submit" value="Submit">Submit</button> <button class="btn btn-reset btn-secondary" type="reset" value="Reset">Reset</button></p>
 </form>
