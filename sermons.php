@@ -1,4 +1,6 @@
 <?php
+include './password.php';
+
 mysqli_report(MYSQLI_REPORT_ERROR);
 require_once('books.php');
 require_once('docx.php');
@@ -9,9 +11,8 @@ require_once('getid3/getid3/write.php');
 $getID3 = new getID3;
 $getID3->setOption(array('encoding'=>$encoding));
 
-$server_name = "127.0.0.1";
 $username = "boisecc1_website";
-$password = "website12834";
+$server_name = "127.0.0.1";
 $db_name = "boisecc1_joomla";
 $prefix = 'vqyis_';
 $pptx_settings = '|width:650|height:450|border:1|border_style:solid|border_color:#000000';
